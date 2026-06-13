@@ -1,4 +1,4 @@
-# Phiên bản Cmake tối thiểu cho dự án (c++ 26)
+# Phiên bản Cmake tối thiểu cho dự án (c++26)
 cmake_minimum_required(VERSION 3.30)
 
 # Đặt tên cho project
@@ -8,7 +8,7 @@ project(AI_Agent_Project)
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Lệnh này giúp folder include trở thàng một cái gốc nên ta chỉ cần include<nlohmann/json.hpp>. Không cần thêm thư mục include ở đầu
+# Lệnh này giúp folder include trở thàng một cái gốc nên ta chỉ cần include"nlohmann/json.hpp". Không cần thêm thư mục include ở đầu
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Tượng tự trên do các folder/file trong thư mục src tương tác qua lại rất nhiều nên ta để src làm gốc và ta ko cần phải cho src vào include nữa
