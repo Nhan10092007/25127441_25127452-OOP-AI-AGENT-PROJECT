@@ -21,6 +21,3 @@ public:
     ~OllamaClient();
     LLMResponse sendRequest(const std::vector<Message> &messages) override;
 };
-
-
-// For other API like OpenAIAPI,...:

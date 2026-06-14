@@ -35,6 +35,7 @@ LLMResponse OllamaClient::sendRequest(const std::vector<Message> &messages){
         {"num_predict", _numPredict}
     };
     json json_messages = json::array();
+    // Structutred bindings:
     for(const auto& [role, content, images] : messages){
         json temp;
         temp["role"] = role;
@@ -104,7 +105,7 @@ LLMResponse OllamaClient::sendRequest(const std::vector<Message> &messages){
 
     // Libcurl là ngôn ngữ C nên ko xài try-catch được
     if(result != CURLE_OK){
-        throw std::runtime_error(curl_easy_strerror(result));
+        throw std::runtime_error("Libcurl Error: "+ std::string(curl_easy_strerror(result)));
     }
 
     try{
@@ -120,12 +121,9 @@ LLMResponse OllamaClient::sendRequest(const std::vector<Message> &messages){
         return finalresponse;
     }
     catch(const json::parse_error& e){
-        throw std::runtime_error("Malformed JSON Error: " + std::string(e.what()) + "\nData tho nhan duoc: " + responseData);
+        throw std::runtime_error("Malformed JSON Error: " + std::string(e.what()) + "\nRaw Data to check: " + responseData);
     }
     catch(const std::exception& e){
         throw std::runtime_error("JSON Error: " + std::string(e.what()));
     }
 }
-
-
-// *Note: curl_global_init() Khai báo cái này ở hàm main
