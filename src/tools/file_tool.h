@@ -1,8 +1,8 @@
 #pragma once
 #include "Tool.h"
 
-class CalculatorTool : public Tool {
+class FileTool : public Tool {
 public:
-    CalculatorTool();
+    FileTool();
     std::optional<std::string> execute(const nlohmann::json& args) override;
 };
