@@ -13,8 +13,10 @@ private:
     std::string _taskPlanner;
     std::string _errorRecovery;
     std::unordered_map<std::string, std::string> skillStorage;
+    std::vector<std::string> availableSkills;
 public:
     SkillLoader(const fs::path skillsFolder);
     ~SkillLoader();
     std::string getSkills(const std::vector<std::string>& skillsName);
+    std::vector<std::string> getAvailableSkills();
 };

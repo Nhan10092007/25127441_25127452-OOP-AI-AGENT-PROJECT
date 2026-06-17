@@ -28,6 +28,7 @@ SkillLoader::SkillLoader(const fs::path skillsFolder){
                 }
                 else{
                     skillStorage[entry.path().stem().string()] = content; //.stem chỉ lưu tên file, không lưu loại file
+                    availableSkills.push_back(entry.path().stem().string());
                 }
             }
             file.close();
@@ -52,4 +53,8 @@ std::string SkillLoader::getSkills(const std::vector<std::string>& skillsName){
         res += skillStorage[skill] + "\n\n";
     }
     return _taskPlanner + "\n\n" + _errorRecovery + "\n\n" + res;
+}
+
+std::vector<std::string> SkillLoader::getAvailableSkills(){
+    return availableSkills;
 }
