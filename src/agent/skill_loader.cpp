@@ -3,9 +3,32 @@
 #include<sstream>
 #include<stdexcept>
 
+// Thuật toán Trim:
+std::string SkillLoader::trim(const std::string &str){
+    auto first = str.find_first_not_of(" \t\r\n");
+    if(first == std::string::npos){
+        return "";
+    }
+    auto last = str.find_last_not_of(" \t\r\n");
+    return str.substr(first, (last - first + 1));
+}
+
+std::vector<std::string> SkillLoader::splitKeywords(const std::string& s){
+    std::vector<std::string> result;
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, ',')){
+        std::string keyword = trim(item);
+        if(!keyword.empty()){
+            result.push_back(keyword);
+        }
+    }
+    return result;
+}
+
 SkillLoader::~SkillLoader() = default;
 
-SkillLoader::SkillLoader(const fs::path skillsFolder){
+SkillLoader::SkillLoader(const fs::path& skillsFolder){
     if(!fs::is_directory(skillsFolder)){
         throw fs::filesystem_error("File system error: The directory skills is not exist", fs::path(skillsFolder), std::make_error_code(std::errc::no_such_file_or_directory));
     }
@@ -15,23 +38,50 @@ SkillLoader::SkillLoader(const fs::path skillsFolder){
             if(!file.is_open()){
                 throw std::runtime_error("Can't open file: " + entry.path().filename().string());
             }
-            else{
-                std::stringstream buffer;
-                buffer << file.rdbuf(); // .rdbuf() trả về con trỏ trỏ thẳng vào luồng raw bytes => Lấy tất cả nội dung cho vào buffer dưới dạng bytes
-                std::string content = buffer.str();
+            std::vector<std::string> keywords;
+            std::string content = "";
+            std::string line;
 
-                if(entry.path().filename().string() == "task_planner.md"){
-                    _taskPlanner = content;
+            bool inFrontmatter = false;
+            bool frontmatterDone = false;
+
+            while(std::getline(file, line)){
+                if(!frontmatterDone && line.find("---") == 0){
+                    if(!inFrontmatter){
+                        inFrontmatter = true;
+                    }
+                    else{
+                        inFrontmatter = false;
+                        frontmatterDone = true;
+                    }
+                    continue;
                 }
-                else if(entry.path().filename().string() == "error_recovery.md"){
-                    _errorRecovery = content;
+
+                if(inFrontmatter){
+                    if(line.find("keywords:") == 0){
+                        std::string kwString = line.substr(9); // Cắt phần "keyword:", lấy từ index 9 trở đi.
+                        keywords = splitKeywords(kwString); //
+                    }
                 }
                 else{
-                    skillStorage[entry.path().stem().string()] = content; //.stem chỉ lưu tên file, không lưu loại file
-                    availableSkills.push_back(entry.path().stem().string());
+                    content += line + "\n";
                 }
             }
             file.close();
+
+            std::string filename = entry.path().stem().string();
+
+            if(filename == "task_planner"){
+                _taskPlanner = trim(content);
+            }
+            else if(filename == "error_recovery"){
+                _errorRecovery = trim(content);
+            }
+            else{
+                skillKeywords[filename] = keywords;
+                skillStorage[filename] = trim(content);
+            }
+
         }
     }
     if(_taskPlanner.empty() || _errorRecovery.empty()){
@@ -55,6 +105,6 @@ std::string SkillLoader::getSkills(const std::vector<std::string>& skillsName){
     return _taskPlanner + "\n\n" + _errorRecovery + "\n\n" + res;
 }
 
-std::vector<std::string> SkillLoader::getAvailableSkills(){
-    return availableSkills;
+const std::unordered_map<std::string, std::vector<std::string>>& SkillLoader::getSkillKeywords(){
+    return skillKeywords;
 }
