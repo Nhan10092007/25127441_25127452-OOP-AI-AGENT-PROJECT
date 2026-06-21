@@ -3,6 +3,7 @@
 #include<sstream>
 #include<stdexcept>
 
+
 // Thuật toán Trim:
 std::string SkillLoader::trim(const std::string &str){
     auto first = str.find_first_not_of(" \t\r\n");
@@ -107,4 +108,29 @@ std::string SkillLoader::getSkills(const std::vector<std::string>& skillsName){
 
 const std::unordered_map<std::string, std::vector<std::string>>& SkillLoader::getSkillKeywords(){
     return skillKeywords;
+}
+
+std::string SkillLoader::toLower(const std::string& str){
+    std::string result = str;
+    for(char& c : result){
+        c = std::tolower(static_cast<unsigned char>(c));
+    }
+    return result;
+}
+
+std::vector<std::string> SkillLoader::selectSkills(const std::string& prompt){
+    if(prompt.empty()){
+        throw std::runtime_error("Empty prompt: Can't select skills");
+    }
+    std::string lowerPrompt = toLower(prompt);
+    std::vector<std::string> matchSKills;
+    for(const auto& [skill, keywords] : skillKeywords){
+        for(const std::string& keyword : keywords){
+            if(lowerPrompt.find(toLower(keyword)) != std::string::npos){
+                matchSKills.push_back(skill);
+                break;
+            }
+        }
+    }
+    return matchSKills;
 }

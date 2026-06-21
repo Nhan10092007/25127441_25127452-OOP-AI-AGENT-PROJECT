@@ -18,9 +18,11 @@ private:
     // Helper function:
     std::string trim(const std::string& str);
     std::vector<std::string> splitKeywords(const std::string& s);
+    std::string toLower(const std::string& str);
 public:
     SkillLoader(const fs::path& skillsFolder);
     ~SkillLoader();
     std::string getSkills(const std::vector<std::string>& skillsName);
     const std::unordered_map<std::string, std::vector<std::string>>& getSkillKeywords();
+    std::vector<std::string> selectSkills(const std::string& prompt);
 };
