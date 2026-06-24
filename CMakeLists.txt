@@ -19,6 +19,10 @@ find_package(CURL REQUIRED)
 
 # Đóng gói các file lại để dễ quản lí và chạy
 set(CLIENT_SOURCE src/client/ollama_client.cpp)
+set(ENVIRONMENT_SOURCE
+src/env/native_environment.cpp
+src/env/sandbox_environment.cpp
+)
 set(AGENT_SOURCE 
 src/agent/agent_loop.cpp
 src/agent/loop_detector.cpp
@@ -40,7 +44,7 @@ src/harness/harness_runner.cpp
 )
 
 # Đúc thành file agent_runner.exe để chạy
-add_executable(agent_runner benchmark/run_eval.cpp src/sqlite3.c ${AGENT_SOURCE} ${CLIENT_SOURCE} ${TOOL_SOURCE} ${HARNESS_SOURCE})
+add_executable(agent_runner benchmark/run_eval.cpp src/sqlite3.c ${AGENT_SOURCE} ${ENVIRONMENT_SOURCE} ${CLIENT_SOURCE} ${TOOL_SOURCE} ${HARNESS_SOURCE})
 
 # Lắp thư viện libcurl vào file để chạy
 target_link_libraries(agent_runner PRIVATE CURL::libcurl)
