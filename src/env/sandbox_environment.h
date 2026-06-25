@@ -15,6 +15,10 @@ class SandboxEnvironment : public Environment{
 private:
     std::unique_ptr<Environment> wrapped;  // Dùng con trỏ này để bọc lấy Native Environment
     fs::path workspaceRoot;
+
+    // Helper Functions:
+    std::optional<fs::path> isSafePath(const std::string& args);
+    bool isSafeCommand(const std::string &args);
 public:
     SandboxEnvironment(std::unique_ptr<Environment> inner, const EnvironmentConfig& config);
     ToolResult step(const ToolInput& toolRequest) override;
