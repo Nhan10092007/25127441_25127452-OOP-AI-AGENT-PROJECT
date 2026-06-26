@@ -61,7 +61,7 @@ SkillLoader::SkillLoader(const fs::path& skillsFolder){
                 if(inFrontmatter){
                     if(line.find("keywords:") == 0){
                         std::string kwString = line.substr(9); // Cắt phần "keyword:", lấy từ index 9 trở đi.
-                        keywords = splitKeywords(kwString); //
+                        keywords = splitKeywords(kwString);
                     }
                 }
                 else{
