@@ -1,9 +1,8 @@
 #pragma once
 
-#include "environment.h"
+#include"environment.h"
+#include"tool_registry.h"
 #include<memory>
-
-class ToolRegistry;
 
 class NativeEnvironment : public Environment{
 private:

@@ -3,6 +3,7 @@
 #include"nlohmann/json.hpp"
 #include<optional>
 #include<stdexcept>
+#include<vector>
 
 using json = nlohmann::json;
 
@@ -21,8 +22,29 @@ std::optional<fs::path> SandboxEnvironment::isSafePath(const std::string& userPa
 }
 // Với trường hợp rel == "." thì nó rất hiếm và chỉ xảy ra khi userPath rỗng,... Với edge case này nó không quá nghiêm trọng và có thể được xử lí khi thực hiện tool.
 
+std::string SandboxEnvironment::toLower(const std::string& str){ // Chuẩn hóa hết Command về lowercase
+    std::string result = str;
+    for(char& c : result){
+        c = std::tolower(static_cast<unsigned char>(c));
+    }
+    return result;
+}
+
+// Static => cái này chỉ xài được trong sandbox_environment.cpp
+static const std::vector<std::string> blackList  = {"rm -rf", "sudo", "mkfs", "dd ", "shutdown", "reboot", "halt", "poweroff", "chmod 777",
+    "chown", "curl ", "wget ", ":(){ "};
+
 bool SandboxEnvironment::isSafeCommand(const std::string& userCommand){
-    
+    if(userCommand == ""){
+        return false;
+    }
+    std::string lowerCommand = toLower(userCommand);
+    for(const std::string& command : blackList){
+        if(lowerCommand.find(command) != std::string::npos){
+            return false;
+        }
+    }
+    return true;
 }
 
 ToolResult SandboxEnvironment::step(const ToolInput& toolRequest){

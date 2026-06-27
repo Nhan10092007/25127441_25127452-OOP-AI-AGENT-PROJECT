@@ -17,6 +17,7 @@ private:
     fs::path workspaceRoot;
 
     // Helper Functions:
+    std::string toLower(const std::string& str);
     std::optional<fs::path> isSafePath(const std::string& args);
     bool isSafeCommand(const std::string &args);
 public:
