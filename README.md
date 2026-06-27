@@ -168,7 +168,7 @@ echo 'export PATH="/usr/local/opt/curl/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-## Hướng dẫn build và biên dịch bằng command line:
+# Hướng dẫn build và biên dịch bằng command line:
 
 ## Nâng cấp phiên bản trình biên dịch để có thể biên dịch C++26:
 
@@ -225,26 +225,24 @@ export CXX=$(brew --prefix llvm)/bin/clang++
 - **Bước 3**: Kéo xuống đến phần `C++ standard`, ta chỉnh thành `c++26`.
 - **Bước 4** (Bước kiểm tra lại): Khi chỉnh thành `c++26`, lúc này trong project của chúng ta sẽ xuất hiện thư mục `.vscode/` và trong thư mục ấy sẽ có file `c_cpp_properties.json` ta ấn vào file đó. Nếu ta thấy có mục `"cppStandard": "c++26"` thì ta đã hoàn thành.
 
-## Do các cấu hình xây dựng đã được định nghĩa trong file `CMakeLists.txt`, chúng ta có thể tiến hành biên dịch theo các bước sau:
-
-# Phần này để tạm, sẽ sửa sau
+## Do các cấu hình xây dựng đã được định nghĩa trong file `CMakeLists.txt`, chúng ta có thể tiến hành biên dịch trên terminal theo các bước sau:
 
 - **Bước 1**: Khởi tạo thư mục `build` và nạp cấu hình CMake (Chỉ cần chạy 1 lần đầu tiên hoặc khi có thay đổi trong file `CMakeLists.txt`):
-  - **Trên Windows (MSYS2):**
+  - **Đối với người dùng Windows (MSYS2):**
     ```bash
     cmake -G "MinGW Makefiles" -B build
     ```
-  - **Trên Linux / macOS:**
+  - **Đối với người dùng Linux / macOS:**
     ```bash
     cmake -B build
     ```
 
 - **Bước 2**: Tiến hành biên dịch (build) và chạy chương trình (Sử dụng lệnh này cho mọi lần chạy sau khi sửa code):
-  - **Trên Windows:**
+  - **Đối với người dùng Windows:**
     ```bash
     cmake --build build && ./build/agent_runner.exe
     ```
-  - **Trên Linux / macOS:**
+  - **Đối với người dùng Linux / macOS:**
     ```bash
     cmake --build build && ./build/agent_runner
     ```
