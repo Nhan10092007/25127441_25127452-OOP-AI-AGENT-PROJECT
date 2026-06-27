@@ -1,8 +1,8 @@
 #pragma once
-#include "Tool.h"
+#include "tool.h"
 
 class MemoryTool : public Tool {
 public:
     MemoryTool();
-    std::optional<std::string> execute(const nlohmann::json& args) override;
+   std::string execute(const std::string& args) override;
 };

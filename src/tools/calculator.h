@@ -4,5 +4,5 @@
 class CalculatorTool : public Tool {
 public:
     CalculatorTool();
-    std::optional<std::string> execute(const nlohmann::json& args) override;
+   std::string execute(const std::string& args) override;
 };

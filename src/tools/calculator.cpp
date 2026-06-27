@@ -4,46 +4,47 @@
 #include<vector>
 
 CalculatorTool::CalculatorTool() 
-    : Tool("Calculator", "Thực hiện phép tính cơ bản. Tham số JSON yêu cầu: 'operation' (+, -, *, /) và mảng 'operands' chứa các số.") {}
+    : Tool("calculator", "Tool for performing basic arithmetic operations. Args parameter: a string containing the expression to calculate(example: '2 + 3')") {}
 
-std::optional<std::string> CalculatorTool::execute(const nlohmann::json& args) {
-    if (!args.contains("operation") || !args.contains("operands")) {
-        return "Error: Missing 'operation' or 'operands'";
+std::string CalculatorTool::execute(const std::string& args) {
+    if (args.empty()) {
+        throw std::runtime_error("Error: Missing 'args'");
     }
-    if (!args["operands"].is_array()) {
-        return "Error: 'operands' must be an array of numbers";
-    }
+
     try {
-        std::string op = args["operation"];
-        auto operands = args["operands"].get<std::vector<double>>();
-
-        if (operands.empty()) {
-            return "Error: 'operands' array is empty";
+        std::istringstream iss(args);
+        double result = 0;
+        if (!(iss >> result)) {
+            throw std::runtime_error("Error: Invalid start of expression");
         }
-        double result = operands[0];
-        for (size_t i = 1; i < operands.size(); ++i) {
-            if (op == "+") {
-                result += operands[i];
-            } 
-            else if (op == "-") {
-                result -= operands[i];
-            } 
-            else if (op == "*") {
-                result *= operands[i];
-            } 
-            else if (op == "/") {
-                if (operands[i] == 0) return "Error: Division by zero";
-                result /= operands[i];
-            } 
-            else {
-                return "Error: Unsupported operation '" + op + "'";
+        char op;
+        while (iss>>op){
+            double nextValue;
+            if (!(iss >> nextValue)) {
+                throw std::runtime_error("Error: Missing number after operator");
+            }
+            switch(op){
+                case '+': 
+                result+=nextValue; 
+                break;
+            case '-': 
+                result-=nextValue; 
+                break;
+            case '*': 
+                result *=nextValue; 
+                break;
+            case '/': 
+                if (nextValue == 0) {
+                    throw std::runtime_error("Error: Can't divide for 0");
+                }
+                result/=nextValue; 
+                break;
+            default:
+                throw std::runtime_error(std::string("Error operator: ") + op);
             }
         }
-
         return std::to_string(result);
-
     } catch (const std::exception& e) {
-    
-        return std::string("Error parsing arguments: ") + e.what();
+        throw std::runtime_error(std::string("Error during calculation: ") + e.what());
     }
 }

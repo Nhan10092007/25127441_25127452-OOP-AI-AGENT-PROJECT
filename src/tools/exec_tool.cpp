@@ -5,22 +5,22 @@
 #include <cstdio>   // Thư viện chuẩn C chứa popen, pclose, fgets
 
 ExecTool::ExecTool() 
-    : Tool("exec", "Thực thi lệnh hệ thống (shell command). Tham số JSON yêu cầu: 'command' chứa lệnh cần thực thi.") {}
+    : Tool("exec", "Execute system command (shell command). Args parameter: A string containing the shell command. (Example: 'ls -la').") {}
 
-std::optional<std::string> ExecTool::execute(const nlohmann::json& args) {
-    if (!args.contains("command")) {
-        return "Error: Missing 'command'";
+std::string ExecTool::execute(const std::string& args) {
+    if (args.empty()) {
+        throw std::runtime_error("Error: Missing 'command'");
     }
     
     try {
-        std::string command = args["command"];        
+        std::string command = args;        
         std::string result = "";
         std::array<char, 128> buffer;
 
         FILE* pipe = popen(command.c_str(), "r");
         
         if (!pipe) {
-            return "Error: Không thể khởi chạy lệnh (popen failed).";
+            throw std::runtime_error("Error: Can't run (popen failed).");
         }
 
         while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
@@ -28,12 +28,12 @@ std::optional<std::string> ExecTool::execute(const nlohmann::json& args) {
         }
         pclose(pipe);
         if (result.empty()) {
-            return "Executed successfully, but no output.";
+            throw std::runtime_error("Executed successfully, but no output.");
         }
 
         return result;
 
     } catch (const std::exception& e) {
-        return std::string("Error during execution: ") + e.what();
+        throw std::runtime_error(std::string("Error during execution: ") + e.what());
     }
 }
