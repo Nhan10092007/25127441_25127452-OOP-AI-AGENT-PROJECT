@@ -75,7 +75,7 @@ double calculateExpression(const std::vector<std::string>&tokens){
     return numbers.top();
 }
 
-std::string execute(const std::string& args) {
+std::string CalculatorTool::execute(const std::string& args) {
     if (args.empty()) {
         throw std::runtime_error("Error: Missing 'expression'");
     }

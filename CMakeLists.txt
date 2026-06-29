@@ -44,3 +44,4 @@ add_executable(agent_runner benchmark/run_eval.cpp src/sqlite3.c ${AGENT_SOURCE}
 
 # Lắp thư viện libcurl vào file để chạy
 target_link_libraries(agent_runner PRIVATE CURL::libcurl)
+

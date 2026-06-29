@@ -53,10 +53,16 @@ std::string MemorySave::execute(const std::string& args) {
     sqlite3_prepare_v2(DB, sql, -1, &stmt, nullptr);
     sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, 2, value.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_step(stmt);
+    if (sqlite3_step(stmt)!=SQLITE_DONE){
+        std::string err=sqlite3_errmsg(DB);
+        sqlite3_finalize(stmt);
+        sqlite3_close(DB);
+        throw std::runtime_error("Failed to save to memory: " + err);
+    
+    }
     sqlite3_finalize(stmt);
     sqlite3_close(DB);
-    "Saved '" + key + "' to memory successfully.";
+    return "Saved '" + key + "' to memory successfully.";
 }
 std::string MemorySearch::execute(const std::string&args){
     if (args.empty()) {
@@ -74,7 +80,6 @@ std::string MemorySearch::execute(const std::string&args){
     sqlite3_prepare_v2(DB, sql, -1, &stmt, nullptr);
     sqlite3_bind_text(stmt, 1, key.c_str(), -1, SQLITE_TRANSIENT);
     std::string result;
-    char *errMsg;
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         result = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
     }
