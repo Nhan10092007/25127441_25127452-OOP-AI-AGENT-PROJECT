@@ -1,33 +1,19 @@
 #include "web_tool.h"
 #include <curl/curl.h>
 #include <sstream>
-#include <nlohmann/json.hpp>
+#include "nlohmann/json.hpp"
 using json = nlohmann::json;
 
 WebTool::WebTool() 
-    : Tool("web_search", "Search the web via DuckDuckGo Instant Answer API. Provide a JSON object with a 'query' field.") {}
-
+    : Tool("web_search", "Search the web via DuckDuckGo. Provide a plain string as the search query (example: 'How to be rich'). Do NOT wrap it in JSON.") {}
 std::string WebTool::execute(const std::string& args){
-    json input;
-    try {
-        input = json::parse(args);
+    if (args.empty()){
+    throw std::runtime_error("Missing required field: 'query'");
     }
-    catch (const json::parse_error& e){
-        return json{
-            {"error", "Failed to parse input JSON"},
-            {"detail", e.what()}
-        }.dump();
-    }
-    if (!input.contains("query")){
-        return json{
-            {"error", "Missing required field: 'query'"}
-        }.dump();
-    }
-    std::string query = input["query"].get<std::string>();
-    bool skipDisambig = input.value("skip_disambig", true);
-    bool noHtml = input.value("no_html", true);
+    const bool SKIPDISAMBIG = true;
+    const bool NOHTML = true;
 
-    std::string url = buildUrl(query, skipDisambig, noHtml);
+    std::string url = buildUrl(args, SKIPDISAMBIG, NOHTML);
     std::string response = httpGet(url);
     json api;
     try{
@@ -40,7 +26,7 @@ std::string WebTool::execute(const std::string& args){
         }.dump();
     }
     json result;
-    result["query"] = query;
+    result["query"] = args;
     result["abstract"] = api.value("Abstract", "");
     result["source"] = api.value("AbstractSource", "");
     result["url"] = api.value("AbstractURL", "");

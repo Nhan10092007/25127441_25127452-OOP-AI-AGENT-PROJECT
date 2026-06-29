@@ -1,8 +1,15 @@
 #pragma once
 #include "tool.h"
+#include <sqlite3.h>
 
-class MemoryTool : public Tool {
+class MemorySave : public Tool {
 public:
-    MemoryTool();
+    MemorySave();
    std::string execute(const std::string& args) override;
+};
+
+class MemorySearch : public Tool {
+public:
+    MemorySearch();
+    std::string execute(const std::string& args) override;
 };
