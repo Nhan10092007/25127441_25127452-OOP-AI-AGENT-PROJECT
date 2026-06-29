@@ -14,7 +14,24 @@ int getPriority(char op) {
     if (op == '^') return 3;
     return 0;
 }
-
+bool isNumberToken(const std::string& token) {
+    if (token.empty()) return false;
+    size_t i = 0;
+    if (token[i] == '-' && token.size() > 1) {
+        i = 1; // cho phép số âm dính liền dấu, ví dụ "-5"
+    }
+    bool hasDigit = false;
+    for (; i < token.size(); ++i) {
+        if (std::isdigit(static_cast<unsigned char>(token[i]))) {
+            hasDigit = true;
+        } else if (token[i] == '.') {
+            continue; // cho phép số thực, ví dụ "3.14"
+        } else {
+            return false; 
+        }
+    }
+    return hasDigit;
+}
 void tokenize(const std::string& expression, std::vector<std::string>& tokens) {
     std::istringstream iss(expression);
     std::string token;
@@ -24,6 +41,9 @@ void tokenize(const std::string& expression, std::vector<std::string>& tokens) {
         }
     }
 };
+bool isValidOperator(char c) {
+    return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
+}
 double operate(double a, double b, char op) {
     switch (op) {
         case '+': return a + b;
@@ -41,7 +61,7 @@ double calculateExpression(const std::vector<std::string>&tokens){
     std::stack<double> numbers;
     std::stack<char> ops;
     for (const auto& token : tokens) {
-        if (isdigit(std::stod(token))){
+        if (isNumberToken(token)) {
             numbers.push(std::stod(token));
         }
         else if (token=="("){
@@ -57,20 +77,32 @@ double calculateExpression(const std::vector<std::string>&tokens){
             if (!ops.empty()) ops.pop(); // pop the '('
         }
         else {
+            if (token.size() != 1 || !isValidOperator(token[0])) {
+                throw std::runtime_error("Error: Unknown token '" + token + "'");
+            }
             while (!ops.empty() && getPriority(ops.top()) >= getPriority(token[0])) {
+                if (numbers.size() < 2) {
+                    throw std::runtime_error("Error: Malformed expression");
+                }
                 double b = numbers.top(); numbers.pop();
                 double a = numbers.top(); numbers.pop();
                 char op = ops.top(); ops.pop();
                 numbers.push(operate(a, b, op));
             }
             ops.push(token[0]);
-        }
+}
     }
     while (!ops.empty()) {
+        if (numbers.size() < 2) {
+            throw std::runtime_error("Error: Malformed expression");
+        }
         double b = numbers.top(); numbers.pop();
         double a = numbers.top(); numbers.pop();
         char op = ops.top(); ops.pop();
         numbers.push(operate(a, b, op));
+    }
+    if (numbers.empty()) {
+        throw std::runtime_error("Error: Malformed expression");
     }
     return numbers.top();
 }
