@@ -11,8 +11,13 @@ std::unique_ptr<Tool> ToolRegistry::createTool(const std::string& toolName) {
 std::string ToolRegistry::getToolsDescription(){
     std::string result = "## AVAILABLE TOOLS:\n";
     for(const auto& [toolName, factory] : factories){
-        std::unique_ptr<Tool> tool = factory();
-        result += "- " + tool->getName() + ": " + tool->getDescription() + "\n";
+        try{
+            std::unique_ptr<Tool> tool = factory();
+            result += "- " + tool->getName() + ": " + tool->getDescription() + "\n";
+        }
+        catch(const std::exception& e){
+            result += "- " + toolName + ": Error loading description: " + e.what() + "\n";
+        }
     }
     return result;
 }
