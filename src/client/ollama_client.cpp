@@ -110,6 +110,11 @@ LLMResponse OllamaClient::sendRequest(const std::vector<Message> &messages){
 
     try{
         json data = json::parse(responseData); // Chuyển json string về json obeject
+
+        if(data.contains("error")){  // Xử lí khi Google Colab trả về json lỗi
+            throw std::runtime_error("Ollama/FastAPI Error: " + data["error"].get<std::string>());
+        }
+
         // Kĩ thuật C++20: Designated Initializers
         LLMResponse finalresponse = {
             .response = data["response"],
