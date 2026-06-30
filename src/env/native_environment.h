@@ -1,7 +1,7 @@
 #pragma once
 
 #include"environment.h"
-#include"tool_registry.h"
+#include"tools/tool_registry.h"
 #include<memory>
 
 class NativeEnvironment : public Environment{
