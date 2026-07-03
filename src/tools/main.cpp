@@ -4,7 +4,6 @@
 #include "file_tool.h"
 #include "web_tool.h"
 #include "memory_tool.h"   // giả định: MemorySaveTool / MemorySearchTool theo thiết kế mới nhất
-
 #include <iostream>
 #include <string>
 
@@ -42,13 +41,13 @@ int main() {
     registry.registerTool<ReadTool>("read_file");
     registry.registerTool<WriteTool>("write_file");
     registry.registerTool<WebTool>("web_search");
-    // registry.registerTool<MemorySaveTool>("memory_save");
-    // registry.registerTool<MemorySearchTool>("memory_search");
+    registry.registerTool<MemorySave>("memory_save");
+    registry.registerTool<MemorySearch>("memory_search");
 
     // ================= CalculatorTool =================
     runTest(registry, "calculator", "2 + 3",          "basic add");
     runTest(registry, "calculator", "10 / 2 - 3",      "chain ops");
-    runTest(registry, "calculator", "10 / 0",          "divide by zero -> throw");
+    runTest(registry, "calculator", "3 + ( 10 * 11 )",          "complex ops");
     runTest(registry, "calculator", "abc",             "invalid start -> throw");
     runTest(registry, "calculator", "5 + ",            "missing operand -> throw");
     runTest(registry, "calculator", "",                "empty args -> throw");
@@ -89,14 +88,14 @@ int main() {
     // field "action" trong JSON) thay vì 2 class MemorySaveTool/MemorySearchTool,
     // cần đổi lại tên đăng ký registry và format args cho khớp.
     runTest(registry, "memory_save",
-            R"({"topic": "step1_sum", "value": "32"})",
-            "save first time");
+        R"({"key": "step1_sum", "value": "32"})",
+        "save first time");
     runTest(registry, "memory_save",
-            R"({"topic": "step1_sum", "value": "99"})",
-            "overwrite same topic (expect INSERT OR REPLACE)");
-    runTest(registry, "memory_save",
-            R"({"topic": "step1_sum"})",
-            "missing 'value' -> throw");
+        R"({"key": "step1_sum", "value": "99"})",
+        "overwrite same key (expect INSERT OR REPLACE)");
+        runTest(registry, "memory_save",
+        R"({"key": "step1_sum"})",
+        "missing 'value' -> throw");
     runTest(registry, "memory_save", "not a json", "invalid json -> throw");
 
     runTest(registry, "memory_search", "step1_sum",
