@@ -1,6 +1,6 @@
 #include"tool_registry.h"
 
-std::unique_ptr<Tool> ToolRegistry::createTool(const std::string& toolName) {
+std::unique_ptr<Tool> ToolRegistry::createTool(const std::string& toolName) const{
     auto it = factories.find(toolName);
     if (it != factories.end()) {
         return it->second(); 
@@ -8,7 +8,7 @@ std::unique_ptr<Tool> ToolRegistry::createTool(const std::string& toolName) {
     return nullptr; 
 }
 
-std::string ToolRegistry::getToolsDescription(){
+std::string ToolRegistry::getToolsDescription() const{
     std::string result = "## AVAILABLE TOOLS:\n";
     for(const auto& [toolName, factory] : factories){
         try{

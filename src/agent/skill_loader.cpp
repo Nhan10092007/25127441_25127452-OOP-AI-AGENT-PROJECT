@@ -5,7 +5,7 @@
 
 
 // Thuật toán Trim:
-std::string SkillLoader::trim(const std::string &str){
+std::string SkillLoader::trim(const std::string &str) const{
     auto first = str.find_first_not_of(" \t\r\n");
     if(first == std::string::npos){
         return "";
@@ -14,7 +14,7 @@ std::string SkillLoader::trim(const std::string &str){
     return str.substr(first, (last - first + 1));
 }
 
-std::vector<std::string> SkillLoader::splitKeywords(const std::string& s){
+std::vector<std::string> SkillLoader::splitKeywords(const std::string& s) const{
     std::vector<std::string> result;
     std::stringstream ss(s);
     std::string item;
@@ -90,27 +90,27 @@ SkillLoader::SkillLoader(const fs::path& skillsFolder){
     }
 }
 
-std::string SkillLoader::getSkills(const std::vector<std::string>& skillsName){
+std::string SkillLoader::getSkills(const std::vector<std::string>& skillsName) const{
     for(const std::string& skill : skillsName){
         if(!skillStorage.contains(skill)){
             throw std::runtime_error("Error: Can't find skill " + skill + " in skillStorage!");
         }
-        else if(skillStorage[skill].empty()){
+        else if(skillStorage.at(skill).empty()){
             throw std::runtime_error("Error: " + skill + " skill's file is empty!");
         }
     }
     std::string res;
     for(const std::string& skill : skillsName){ 
-        res += skillStorage[skill] + "\n\n";
+        res += skillStorage.at(skill) + "\n\n";
     }
     return _taskPlanner + "\n\n" + _errorRecovery + "\n\n" + res;
 }
 
-const std::unordered_map<std::string, std::vector<std::string>>& SkillLoader::getSkillKeywords(){
+const std::unordered_map<std::string, std::vector<std::string>>& SkillLoader::getSkillKeywords() const{
     return skillKeywords;
 }
 
-std::string SkillLoader::toLower(const std::string& str){
+std::string SkillLoader::toLower(const std::string& str) const{
     std::string result = str;
     for(char& c : result){
         c = std::tolower(static_cast<unsigned char>(c));
@@ -118,7 +118,7 @@ std::string SkillLoader::toLower(const std::string& str){
     return result;
 }
 
-std::vector<std::string> SkillLoader::selectSkills(const std::string& prompt){
+std::vector<std::string> SkillLoader::selectSkills(const std::string& prompt) const{
     if(prompt.empty()){
         throw std::runtime_error("Empty prompt: Can't select skills");
     }

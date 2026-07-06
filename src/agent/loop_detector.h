@@ -30,7 +30,7 @@ private:
     LoopThreshold loopThreshold;
 
     // Helper function:
-    int checkTrailingBlock(const int period);
+    int checkTrailingBlock(const int period) const;
 public:
     LoopDetector(const LoopThreshold& threshold = LoopThreshold{}); // Default argument
     LoopStatus record(const std::string& toolCall, const std::string& args);

@@ -14,7 +14,7 @@ bool CallRecord::operator!=(const CallRecord& other) const{
     return !(*this == other);
 }
 
-int LoopDetector::checkTrailingBlock(const int period){
+int LoopDetector::checkTrailingBlock(const int period) const{
     int repeatCount = 1;
     if(toolCallHistory.size() < period * 2){
         return repeatCount;
