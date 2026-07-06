@@ -1,0 +1,18 @@
+{
+  "llm": {
+    "base_URL": "https://xxxx.ngrok-free.app/api/chat",
+    "model_name": "gemma4:e4b",
+    "temperature": 0.7,
+    "num_predict": 512
+  },
+  "environment": {
+    "mode": "sandbox",
+    "workspace": "workspace/"
+  },
+  "loop_threshold": {
+    "repeat_warning": 2,
+    "repeat_critical": 3,
+    "pingpong_warning": 2,
+    "pingpong_critical": 3
+  }
+}
