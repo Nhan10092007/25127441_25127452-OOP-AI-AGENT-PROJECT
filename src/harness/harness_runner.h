@@ -21,7 +21,8 @@ struct Task{
     std::string description;
     std::string instruction;
     std::string eval_type;
-    std::string eval_script;
+    std::string eval_script_windows;
+    std::string eval_script_linux;
     int max_steps;
 };
 

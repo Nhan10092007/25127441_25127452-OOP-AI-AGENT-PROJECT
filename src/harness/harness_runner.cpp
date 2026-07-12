@@ -64,7 +64,8 @@ std::vector<Task> HarnessRunner::readTasks(const std::string& tasksPath) const{
         temp.description = task["description"];
         temp.instruction= task["instruction"];
         temp.eval_type = task["eval_type"];
-        temp.eval_script = task["eval_script"];
+        temp.eval_script_windows = task.value("eval_script_windows", "");
+        temp.eval_script_linux = task.value("eval_script_linux", "");
         temp.max_steps = task["max_steps"];
         res.push_back(temp);
     }
