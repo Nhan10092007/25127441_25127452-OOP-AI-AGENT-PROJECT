@@ -5,8 +5,13 @@
 #include <cstdio>   // Thư viện chuẩn C chứa popen, pclose, fgets
 #include <stdexcept>
 
-ExecTool::ExecTool() 
-    : Tool("exec", "Tool for executing system command (shell command). Args parameter: A string containing the shell command. (Example: 'ls -la').") {}
+ExecTool::ExecTool() : Tool("exec", 
+    #ifdef _WIN32
+        "Tool for executing system command (shell command). Args parameter: A string containing the shell command (in Windows, You aren't allowed to use Linux/macOS commands). (Example: 'dir')."
+    #else
+        "Tool for executing system command (shell command). Args parameter: A string containing the shell command (in Linux/macOS). (Example: 'ls -la')."
+    #endif
+){}
 
 std::string ExecTool::execute(const std::string& args) {
     if (args.empty()) {

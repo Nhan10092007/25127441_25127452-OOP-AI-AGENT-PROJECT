@@ -33,12 +33,18 @@ std::string WebTool::execute(const std::string& args){
     result["heading"] = api.value("Heading", "");
     result["definition"] = api.value("Definition", "");
     json relatedTopics = json::array();
+    int count = 0;
+    const int maxRelatedTopics = 5;
     for (const auto& topic : api.value("RelatedTopics", json::array())){
+        if(count >= maxRelatedTopics){
+            break;
+        }
         if (topic.contains("Text") && topic.contains("FirstURL")){
             relatedTopics.push_back({
                 {"text", topic["Text"]},
                 {"url", topic["FirstURL"]}
             });
+            ++count;
         }
     }
     result["related_topics"] = relatedTopics;
