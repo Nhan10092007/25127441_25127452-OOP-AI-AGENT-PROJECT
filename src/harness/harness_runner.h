@@ -9,6 +9,10 @@
 #include"env/native_environment.h"
 #include<vector>
 #include<string>
+#include<filesystem>
+#include<agent/agent_loop.h>
+
+namespace fs = std::filesystem;
 
 struct HarnessConfig{
     LLMConfig llmConfig;
@@ -35,12 +39,16 @@ private:
     std::unique_ptr<Environment> env;
     LoopThreshold threshold;
     std::vector<Task> tasksList;
-
-    // Helper function:
-    HarnessConfig readHarnessConfig(const std::string& configPath) const;
-    std::vector<Task> readTasks(const std::string& tasksPath) const;
-    std::string toLower(const std::string& str) const;
-public:
-    HarnessRunner(const std::string& configPath, const std::string& skillsPath, const std::string& tasksPath);
     
+    // Helper function:
+    HarnessConfig readHarnessConfig(const fs::path& configPath) const;
+    std::vector<Task> readTasks(const fs::path& tasksPath) const;
+    std::string toLower(const std::string& str) const;
+    void archiveWorkspace(const std::string& taskId);
+    double calcSuccessRate(int passCount, int numberOfTasks) const;
+    void exportTaskReport(const Task& task, const AgentResult& result, bool isPass, const fs::path& reportRoot);
+    void exportBatchSummary(int passCount, double successRate, int totalTasks, const fs::path& reportRoot);
+public:
+    HarnessRunner(const fs::path& configPath, const fs::path& skillsPath, const fs::path& tasksPath);
+    void runBatch();
 };
