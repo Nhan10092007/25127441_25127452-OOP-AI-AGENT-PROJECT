@@ -1,9 +1,9 @@
 {
   "llm": {
-    "base_URL": "https://xxxx.ngrok-free.app/api/chat",
+    "base_URL": "https://debug-animate-citizen.ngrok-free.dev/app/chat",
     "model_name": "gemma4:e4b",
-    "temperature": 0.7,
-    "num_predict": 512
+    "temperature": 0.0,
+    "num_predict": 2048
   },
   "environment": {
     "mode": "sandbox",
