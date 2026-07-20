@@ -22,7 +22,7 @@ static void helper(){
     sqlite3_close(DB);
 }
 MemorySave::MemorySave() 
-    : Tool("memory_save", "Tool for saving a key-value pair to local memory. Args parameter: a JSON string with fields 'key' and 'value'. Example: {\"key\": \"username\", \"value\": \"john_doe\"}") {
+    : Tool("memory_save", "Tool for saving a key-value pair to local memory. Args parameter: MUST be a JSON string with fields 'key' and 'value'. Example: {\"key\": \"username\", \"value\": \"john_doe\"}") {
         helper();
     }
 MemorySearch::MemorySearch() 
