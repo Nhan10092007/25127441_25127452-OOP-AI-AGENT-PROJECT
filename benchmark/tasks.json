@@ -52,5 +52,50 @@
     "eval_script_linux": "file",
     "eval_script_windows": "file",
     "max_steps": 6
-  }
+  },
+  {
+    "id": "task_007",
+    "description": "True multi-step math requiring memory across 3 calculation stages",
+    "instruction": "Calculate the area of a rectangle with width 12 and height 7. Then calculate the area of a second rectangle with width 9 and height 15. Save both areas to memory with keys 'area1' and 'area2'. Finally, look up both values from memory and tell me their sum.",
+    "eval_type": "keyword",
+    "eval_script_linux": "219",
+    "eval_script_windows": "219",
+    "max_steps": 12
+},
+{
+    "id": "task_008",
+    "description": "Chained tool usage: calculate, write to file, read back, then verify with exec",
+    "instruction": "Calculate 8 to the power of 3, save the result to a file named cube.txt, then read the file back and use a shell command to check if the file exists and print its content.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/cube.txt && grep 512 workspace/cube.txt",
+    "eval_script_windows": "if exist workspace\\cube.txt findstr 512 workspace\\cube.txt",
+    "max_steps": 12
+},
+{
+    "id": "task_009",
+    "description": "Memory save/search with multiple distinct keys, testing retrieval accuracy (not just last-saved)",
+    "instruction": "Save three facts to memory: key 'fruit' with value 'apple', key 'color' with value 'red', key 'animal' with value 'tiger'. After saving all three, look up only the value for the key 'animal' and tell me what it is.",
+    "eval_type": "keyword",
+    "eval_script_linux": "tiger",
+    "eval_script_windows": "tiger",
+    "max_steps": 14
+},
+{
+    "id": "task_010",
+    "description": "Deliberately malformed-looking expression to test calculator robustness and error recovery",
+    "instruction": "Calculate the result of ((10 - 3) * 4) / (2 + 5), rounded reasoning is not needed, just give me the exact number.",
+    "eval_type": "keyword",
+    "eval_script_linux": "4",
+    "eval_script_windows": "4",
+    "max_steps": 8
+},
+{
+    "id": "task_011",
+    "description": "Read a non-existent file first, forcing the agent to handle a real error before recovering",
+    "instruction": "Read the content of a file named notes.txt. If it does not exist, create it with the content 'first run' instead, then confirm what you did.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/notes.txt && grep 'first run' workspace/notes.txt",
+    "eval_script_windows": "if exist workspace\\notes.txt findstr \"first run\" workspace\\notes.txt",
+    "max_steps": 10
+}
 ]

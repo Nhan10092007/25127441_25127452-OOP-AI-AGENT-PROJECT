@@ -4,27 +4,43 @@
         "role": "system"
     },
     {
-        "content": "Save to memory with key 'city' and value 'Ho Chi Minh City'. Then look up the value of key 'city' and tell me the result.",
+        "content": "Save three facts to memory: key 'fruit' with value 'apple', key 'color' with value 'red', key 'animal' with value 'tiger'. After saving all three, look up only the value for the key 'animal' and tell me what it is.",
         "role": "user"
     },
     {
-        "content": "{\"thought\": \"The user wants me to perform two actions: first, save a specific key-value pair ('city' and 'Ho Chi Minh City') into memory using the memory_save tool. Second, retrieve this saved value using the memory_search tool. I must start with the saving action.\", \"action\": {\"type\": \"tool_call\", \"tool\": \"memory_save\", \"args\": \"{\\\"key\\\": \\\"city\\\", \\\"value\\\": \\\"Ho Chi Minh City\\\"}\"}}",
+        "content": "{\"thought\": \"The user wants me to save three distinct key-value pairs into memory and then retrieve one specific value ('animal'). I must use the memory_save tool for each saving action, as per the instructions. I will start with the first pair: key 'fruit' and value 'apple'.\", \"action\": {\"type\": \"tool_call\", \"tool\": \"memory_save\", \"args\": \"{\\\"key\\\": \\\"fruit\\\", \\\"value\\\": \\\"apple\\\"}\"}}",
         "role": "assistant"
     },
     {
-        "content": "Observation: Saved 'city' to memory successfully.",
+        "content": "Observation: Saved 'fruit' to memory successfully.",
         "role": "user"
     },
     {
-        "content": "{\"thought\": \"The first step of saving the key 'city' was successful. Now I need to execute the second part of the user's request, which is to look up the value associated with the key 'city' using the memory_search tool.\", \"action\": {\"type\": \"tool_call\", \"tool\": \"memory_search\", \"args\": \"city\"}}",
+        "content": "{\"thought\": \"The first fact ('fruit': 'apple') has been saved successfully. Now I need to save the second pair: key 'color' and value 'red'.\", \"action\": {\"type\": \"tool_call\", \"tool\": \"memory_save\", \"args\": \"{\\\"key\\\": \\\"color\\\", \\\"value\\\": \\\"red\\\"}\"}}",
         "role": "assistant"
     },
     {
-        "content": "Observation: Ho Chi Minh City",
+        "content": "Observation: Saved 'color' to memory successfully.",
         "role": "user"
     },
     {
-        "content": "{\"thought\": \"I have successfully completed both requested steps. First, I saved 'Ho Chi Minh City' to memory with the key 'city'. Second, I retrieved and confirmed the value using memory_search. The final result is 'Ho Chi Minh City'. I can now provide the final answer to the user.\", \"action\": {\"type\": \"finish\", \"result\": \"The value associated with the key 'city' in memory is: Ho Chi Minh City.\"}}",
+        "content": "{\"thought\": \"The second fact ('color': 'red') has been saved successfully. Now I must save the third pair: key 'animal' and value 'tiger'. Once all three are saved, I will look up the value associated with the key 'animal'.\", \"action\": {\"type\": \"tool_call\", \"tool\": \"memory_save\", \"args\": \"{\\\"key\\\": \\\"animal\\\", \\\"value\\\": \\\"tiger\\\"}\"}}",
+        "role": "assistant"
+    },
+    {
+        "content": "Observation: Saved 'animal' to memory successfully.",
+        "role": "user"
+    },
+    {
+        "content": "{\"thought\": \"All three facts have been saved successfully ('fruit', 'color', and 'animal'). The final step is to look up only the value for the key 'animal'. I will use the memory_search tool for this.\", \"action\": {\"type\": \"tool_call\", \"tool\": \"memory_search\", \"args\": \"animal\"}}",
+        "role": "assistant"
+    },
+    {
+        "content": "Observation: tiger",
+        "role": "user"
+    },
+    {
+        "content": "{\"thought\": \"I have successfully saved all three facts and then retrieved the value associated with the key 'animal' using memory_search. The result is 'tiger'. I can now provide the final answer to the user.\", \"action\": {\"type\": \"finish\", \"result\": \"The value for the key 'animal' is: tiger.\"}}",
         "role": "assistant"
     }
 ]
