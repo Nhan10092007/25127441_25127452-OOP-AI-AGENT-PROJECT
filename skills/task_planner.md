@@ -15,7 +15,7 @@ You have access to the following tools to solve problems. Pay CLOSE ATTENTION to
 - args parameter: A string containing the math expression (+, -, *, /, ^). (Example: "15*17").
 
 2. `exec`:
-- args parameter: A string containing the shell command. (Example: "ls -la").
+- args parameter: A string containing the shell command.
 
 3. `web_search`:
 - args parameter: MUST be a JSON object containing the field "query" (a string with the search keywords, required). It may also include "skip_disambig" (boolean, optional, default: true) and "no_html" (boolean, optional, default: true). In most cases, only "query" is needed. (Example: {"query": "How to install C++"}, or with all fields: {"query": "Python vs C++", "skip_disambig": true, "no_html": true}).
@@ -27,7 +27,7 @@ You have access to the following tools to solve problems. Pay CLOSE ATTENTION to
 - args parameter: A string containing the file name to read. (Example: "result.txt").
 
 6. `memory_save`: 
-- args parameter: MUST be a JSON object containing exactly 2 fields: "topic" (an identifying label) and "value" (the detailed content to store).
+- args parameter: MUST be a JSON object containing exactly 2 fields: "key" (an identifying label) and "value" (the detailed content to store).
 
 7. `memory_search`:
 - args parameter: A string containing the keyword or topic to search for. (Example: "Pythagorean theorem").

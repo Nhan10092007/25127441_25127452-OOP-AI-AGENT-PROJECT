@@ -16,6 +16,6 @@ public:
             return std::make_unique<T>(); 
         };
     }
-    std::unique_ptr<Tool> createTool(const std::string& toolName);
-    std::string getToolsDescription();
+    std::unique_ptr<Tool> createTool(const std::string& toolName) const;
+    std::string getToolsDescription() const;
 };
