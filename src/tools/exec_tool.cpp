@@ -18,7 +18,11 @@ std::string ExecTool::execute(const std::string& args) {
         throw std::runtime_error("Missing args");
     }
 
-    std::string command = args;        
+    #ifdef _WIN32
+        std::string command = "(" + args + ") 2>&1"; // 2>&1 chuyển các thông báo từ stderr sang stdout để có thể đọc được lỗi
+    #else
+        std::string command = args + " 2>&1";
+    #endif
     std::string result = "";
     std::array<char, 128> buffer;
 

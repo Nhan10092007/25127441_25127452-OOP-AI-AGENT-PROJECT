@@ -32,7 +32,8 @@ LLMResponse OllamaClient::sendRequest(const std::vector<Message> &messages){
     json_payload["stream"] = false;
     json_payload["options"] = {
         {"temperature", _temperature},
-        {"num_predict", _numPredict}
+        {"num_predict", _numPredict},
+        {"num_ctx", _numCtx}
     };
     json json_messages = json::array();
     // Structutred bindings:

@@ -1,7 +1,12 @@
 build/
 .vscode/
+trajectory/
+workspace/
+report/
+archive/
 
 *.DS_Store
 *.exe
 *.dll
 *.out
+*.db

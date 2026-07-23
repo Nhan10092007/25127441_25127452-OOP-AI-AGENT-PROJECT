@@ -7,6 +7,7 @@ struct LLMConfig{
     std::string model_name;
     float temperature;
     int num_predict;
+    int num_ctx;
 };
 
 // For Ollanma API:
@@ -16,6 +17,7 @@ private:
     std::string _modelName;
     float _temperature;
     int _numPredict;
+    int _numCtx;
 public:
     OllamaClient(const LLMConfig& config);
     ~OllamaClient();

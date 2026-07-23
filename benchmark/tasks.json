@@ -1,101 +1,101 @@
 [
   {
     "id": "task_001",
-    "description": "Basic arithmetic using calculator tool, write result to file",
-    "instruction": "Calculate 15 multiplied by 17. Save the result to result.txt",
-    "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/result.txt && grep 255 workspace/result.txt",
-    "eval_script_windows": "if exist workspace\\result.txt findstr 255 workspace\\result.txt",
-    "max_steps": 8
+    "description": "Simple calculation",
+    "instruction": "Calculate 23 multiplied by 19, then tell me the exact result.",
+    "eval_type": "keyword",
+    "eval_script_linux": "437",
+    "eval_script_windows": "437",
+    "max_steps": 6
   },
   {
     "id": "task_002",
-    "description": "Multi-step math requiring memory to store intermediate result",
-    "instruction": "Add 12 and 8, then multiply that result by 5. Tell me the final result.",
+    "description": "Simple calculation with mixed operators",
+    "instruction": "Calculate ((50 - 14) / 4) + 7 and give me the exact number.",
     "eval_type": "keyword",
-    "eval_script_linux": "100",
-    "eval_script_windows": "100",
-    "max_steps": 10
+    "eval_script_linux": "16",
+    "eval_script_windows": "16",
+    "max_steps": 6
   },
   {
     "id": "task_003",
-    "description": "Simple file write and read back",
-    "instruction": "Write the string 'hello agent' to a file named greeting.txt, then read that file back and tell me its content.",
+    "description": "Simple file read/write",
+    "instruction": "Write the text 'Setup complete' into a file named status.txt, then read the file back and tell me its content.",
     "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/greeting.txt && grep 'hello agent' workspace/greeting.txt",
-    "eval_script_windows": "if exist workspace\\greeting.txt findstr \"hello agent\" workspace\\greeting.txt",
+    "eval_script_linux": "test -f workspace/status.txt && grep 'Setup complete' workspace/status.txt",
+    "eval_script_windows": "if exist workspace\\status.txt findstr \"Setup complete\" workspace\\status.txt",
     "max_steps": 8
   },
   {
     "id": "task_004",
-    "description": "Memory save then search in the same task",
-    "instruction": "Save to memory with key 'city' and value 'Ho Chi Minh City'. Then look up the value of key 'city' and tell me the result.",
-    "eval_type": "keyword",
-    "eval_script_linux": "Ho Chi Minh City",
-    "eval_script_windows": "Ho Chi Minh City",
+    "description": "Simple time retrieval",
+    "instruction": "Use a shell command to get the current date and time, then save whatever it prints into a file named current_time.txt.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -s workspace/current_time.txt",
+    "eval_script_windows": "dir workspace\\current_time.txt >nul 2>&1",
     "max_steps": 8
   },
   {
     "id": "task_005",
-    "description": "Web search for general knowledge",
-    "instruction": "Search for information about the capital city of France and tell me which city it is.",
-    "eval_type": "keyword",
-    "eval_script_linux": "Paris",
-    "eval_script_windows": "Paris",
-    "max_steps": 6
+    "description": "Medium: calculator + write_file + read_file in sequence",
+    "instruction": "Calculate 15 multiplied by 17, save the result into a file named product.txt, then read the file back to confirm the value is correct.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/product.txt && grep 255 workspace/product.txt",
+    "eval_script_windows": "if exist workspace\\product.txt findstr 255 workspace\\product.txt",
+    "max_steps": 10
   },
   {
     "id": "task_006",
-    "description": "Exec tool listing files (sanity check for shell command execution)",
-    "instruction": "Run a command to list the files in the current directory and tell me how many files there are.",
+    "description": "Medium: memory lookup with a condition",
+    "instruction": "Check if a value is already saved in memory under the key 'launch_status'. If nothing is found, save the value 'ready' under that key. Then tell me what the final value under 'launch_status' is.",
     "eval_type": "keyword",
-    "eval_script_linux": "file",
-    "eval_script_windows": "file",
-    "max_steps": 6
+    "eval_script_linux": "ready",
+    "eval_script_windows": "ready",
+    "max_steps": 10
   },
   {
     "id": "task_007",
-    "description": "True multi-step math requiring memory across 3 calculation stages",
-    "instruction": "Calculate the area of a rectangle with width 12 and height 7. Then calculate the area of a second rectangle with width 9 and height 15. Save both areas to memory with keys 'area1' and 'area2'. Finally, look up both values from memory and tell me their sum.",
-    "eval_type": "keyword",
-    "eval_script_linux": "219",
-    "eval_script_windows": "219",
-    "max_steps": 12
-},
-{
-    "id": "task_008",
-    "description": "Chained tool usage: calculate, write to file, read back, then verify with exec",
-    "instruction": "Calculate 8 to the power of 3, save the result to a file named cube.txt, then read the file back and use a shell command to check if the file exists and print its content.",
-    "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/cube.txt && grep 512 workspace/cube.txt",
-    "eval_script_windows": "if exist workspace\\cube.txt findstr 512 workspace\\cube.txt",
-    "max_steps": 12
-},
-{
-    "id": "task_009",
-    "description": "Memory save/search with multiple distinct keys, testing retrieval accuracy (not just last-saved)",
-    "instruction": "Save three facts to memory: key 'fruit' with value 'apple', key 'color' with value 'red', key 'animal' with value 'tiger'. After saving all three, look up only the value for the key 'animal' and tell me what it is.",
-    "eval_type": "keyword",
-    "eval_script_linux": "tiger",
-    "eval_script_windows": "tiger",
-    "max_steps": 14
-},
-{
-    "id": "task_010",
-    "description": "Deliberately malformed-looking expression to test calculator robustness and error recovery",
-    "instruction": "Calculate the result of ((10 - 3) * 4) / (2 + 5), rounded reasoning is not needed, just give me the exact number.",
-    "eval_type": "keyword",
-    "eval_script_linux": "4",
-    "eval_script_windows": "4",
-    "max_steps": 8
-},
-{
-    "id": "task_011",
-    "description": "Read a non-existent file first, forcing the agent to handle a real error before recovering",
+    "description": "Medium: conditional file creation",
     "instruction": "Read the content of a file named notes.txt. If it does not exist, create it with the content 'first run' instead, then confirm what you did.",
     "eval_type": "functional",
     "eval_script_linux": "test -f workspace/notes.txt && grep 'first run' workspace/notes.txt",
     "eval_script_windows": "if exist workspace\\notes.txt findstr \"first run\" workspace\\notes.txt",
     "max_steps": 10
-}
+  },
+  {
+    "id": "task_008",
+    "description": "Medium: exec combined with write_file",
+    "instruction": "Use a shell command to list the files inside the workspace folder, then write the exact command output into a file named listing.txt.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -s workspace/listing.txt",
+    "eval_script_windows": "dir workspace\\listing.txt >nul 2>&1",
+    "max_steps": 10
+  },
+  {
+    "id": "task_009",
+    "description": "Hard: multi-step reconciliation, agent decides tool order",
+    "instruction": "You need to reconcile an inventory count. First check if a value is already stored under the key 'inventory_count' in memory. If it is not stored yet, calculate the total of 8 boxes with 24 items each, save that total under the key 'inventory_count', and also write the total into a file named inventory.txt. Finally, tell me the total inventory count.",
+    "eval_type": "keyword",
+    "eval_script_linux": "192",
+    "eval_script_windows": "192",
+    "max_steps": 14
+  },
+  {
+    "id": "task_010",
+    "description": "Hard: multi-step pricing with discount, agent decides tool order",
+    "instruction": "Figure out the total price for 3 items costing $12.50, $8.25, and $15.00, apply a 10% discount on the total, save the discounted total to memory under the key 'final_total', and write that same amount into a file called receipt.txt. Then tell me the final amount.",
+    "eval_type": "keyword",
+    "eval_script_linux": "32.175",
+    "eval_script_windows": "32.175",
+    "max_steps": 14
+  },
+  {
+    "id": "task_011",
+    "description": "Optional: web_search tool demonstration (known limitation — DuckDuckGo Instant Answer may return empty results for general questions)",
+    "instruction": "Search for information about Albert Einstein and tell me what he is known for.",
+    "eval_type": "keyword",
+    "eval_script_linux": "physicist",
+    "eval_script_windows": "physicist",
+    "max_steps": 6
+  }
 ]
