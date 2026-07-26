@@ -10,3 +10,5 @@ archive/
 *.dll
 *.out
 *.db
+
+document.md
