@@ -65,7 +65,7 @@
   {
     "id": "task_008",
     "description": "Medium: exec combined with write_file",
-    "instruction": "Use a shell command to list the files inside the workspace folder, then write the exact command output into a file named listing.txt.",
+    "instruction": "Use a shell command to list the files in the current directory, then write only the last two summary lines of that command's output (the lines reporting the number of files and number of directories) into a file named listing.txt.",
     "eval_type": "functional",
     "eval_script_linux": "test -s workspace/listing.txt",
     "eval_script_windows": "dir workspace\\listing.txt >nul 2>&1",
