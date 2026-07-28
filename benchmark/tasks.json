@@ -1,101 +1,92 @@
 [
   {
     "id": "task_001",
-    "description": "Simple calculation",
-    "instruction": "Calculate 23 multiplied by 19, then tell me the exact result.",
+    "description": "Simple: calculation",
+    "instruction": "Calculate the total area of a rectangular room that is 12.5 meters long and 8.4 meters wide, then tell me the exact result in square meters.",
     "eval_type": "keyword",
-    "eval_script_linux": "437",
-    "eval_script_windows": "437",
+    "eval_script_linux": "105",
+    "eval_script_windows": "105",
     "max_steps": 6
   },
   {
     "id": "task_002",
-    "description": "Simple calculation with mixed operators",
-    "instruction": "Calculate ((50 - 14) / 4) + 7 and give me the exact number.",
-    "eval_type": "keyword",
-    "eval_script_linux": "16",
-    "eval_script_windows": "16",
-    "max_steps": 6
+    "description": "Simple: multi-line file write/read",
+    "instruction": "Write a two-line note to a file named memo.txt: first line 'Meeting at 3pm', second line 'Bring the report'. Then read the file back and tell me its full content.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/memo.txt && grep -q 'Bring the report' workspace/memo.txt",
+    "eval_script_windows": "if exist workspace\\memo.txt findstr \"Bring the report\" workspace\\memo.txt",
+    "max_steps": 8
   },
   {
     "id": "task_003",
-    "description": "Simple file read/write",
-    "instruction": "Write the text 'Setup complete' into a file named status.txt, then read the file back and tell me its content.",
+    "description": "Simple: time retrieval via exec",
+    "instruction": "Use a shell command to get the current date, then write just that output into a file named datetamp.txt.",
     "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/status.txt && grep 'Setup complete' workspace/status.txt",
-    "eval_script_windows": "if exist workspace\\status.txt findstr \"Setup complete\" workspace\\status.txt",
+    "eval_script_linux": "test -s workspace/datetamp.txt",
+    "eval_script_windows": "dir workspace\\datetamp.txt >nul 2>&1",
     "max_steps": 8
   },
   {
     "id": "task_004",
-    "description": "Simple time retrieval",
-    "instruction": "Use a shell command to get the current date and time, then save whatever it prints into a file named current_time.txt.",
-    "eval_type": "functional",
-    "eval_script_linux": "test -s workspace/current_time.txt",
-    "eval_script_windows": "dir workspace\\current_time.txt >nul 2>&1",
+    "description": "Simple: web_search lookup",
+    "instruction": "Search for information about Marie Curie and tell me what she is known for.",
+    "eval_type": "keyword",
+    "eval_script_linux": "Nobel",
+    "eval_script_windows": "Nobel",
     "max_steps": 8
   },
   {
     "id": "task_005",
-    "description": "Medium: calculator + write_file + read_file in sequence",
-    "instruction": "Calculate 15 multiplied by 17, save the result into a file named product.txt, then read the file back to confirm the value is correct.",
-    "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/product.txt && grep 255 workspace/product.txt",
-    "eval_script_windows": "if exist workspace\\product.txt findstr 255 workspace\\product.txt",
+    "description": "Medium: memory conditional + calculator",
+    "instruction": "Check memory for a key called 'shipping_fee'. If it is not found, calculate 15% of a $240 order total as the shipping fee, save that value under 'shipping_fee', then tell me the fee amount.",
+    "eval_type": "keyword",
+    "eval_script_linux": "36",
+    "eval_script_windows": "36",
     "max_steps": 10
   },
   {
     "id": "task_006",
-    "description": "Medium: memory lookup with a condition",
-    "instruction": "Check if a value is already saved in memory under the key 'launch_status'. If nothing is found, save the value 'ready' under that key. Then tell me what the final value under 'launch_status' is.",
-    "eval_type": "keyword",
-    "eval_script_linux": "ready",
-    "eval_script_windows": "ready",
-    "max_steps": 10
+    "description": "Medium: file conditional + exec verification (3 tools)",
+    "instruction": "Read a file named config.txt. If it does not exist, create it with the content 'version=1.0', then use a shell command to display the file's content back to confirm it was written correctly.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/config.txt && grep 'version=1.0' workspace/config.txt",
+    "eval_script_windows": "if exist workspace\\config.txt findstr \"version=1.0\" workspace\\config.txt",
+    "max_steps": 12
   },
   {
     "id": "task_007",
-    "description": "Medium: conditional file creation",
-    "instruction": "Read the content of a file named notes.txt. If it does not exist, create it with the content 'first run' instead, then confirm what you did.",
-    "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/notes.txt && grep 'first run' workspace/notes.txt",
-    "eval_script_windows": "if exist workspace\\notes.txt findstr \"first run\" workspace\\notes.txt",
+    "description": "Medium: web_search + memory caching",
+    "instruction": "Search for information about the Python programming language, save a key fact about it to memory under the key 'python_info', then look it up again from memory and tell me what it says.",
+    "eval_type": "keyword",
+    "eval_script_linux": "Guido",
+    "eval_script_windows": "Guido",
     "max_steps": 10
   },
   {
     "id": "task_008",
-    "description": "Medium: exec combined with write_file",
-    "instruction": "Use a shell command to list the files in the current directory, then write only the last two summary lines of that command's output (the lines reporting the number of files and number of directories) into a file named listing.txt.",
+    "description": "Medium: 4-tool sequential chain",
+    "instruction": "Calculate 9 to the power of 2, write the result to a file named square.txt, use a shell command to display that file's content, and finally read the file directly using the file-reading tool to confirm the value.",
     "eval_type": "functional",
-    "eval_script_linux": "test -s workspace/listing.txt",
-    "eval_script_windows": "dir workspace\\listing.txt >nul 2>&1",
-    "max_steps": 10
+    "eval_script_linux": "test -f workspace/square.txt && grep 81 workspace/square.txt",
+    "eval_script_windows": "if exist workspace\\square.txt findstr 81 workspace\\square.txt",
+    "max_steps": 12
   },
   {
     "id": "task_009",
-    "description": "Hard: multi-step reconciliation, agent decides tool order",
-    "instruction": "You need to reconcile an inventory count. First check if a value is already stored under the key 'inventory_count' in memory. If it is not stored yet, calculate the total of 8 boxes with 24 items each, save that total under the key 'inventory_count', and also write the total into a file named inventory.txt. Finally, tell me the total inventory count.",
+    "description": "Hard: web_search + calculator + memory + file, agent decides tool order",
+    "instruction": "I want to know how many years ago Albert Einstein was born, based on the year 1879 and today's year 2026. Search for confirmation of his birth year, calculate the number of years since then, save that number to memory under 'einstein_age_years', and write it into a file named einstein_fact.txt. Tell me the final number.",
     "eval_type": "keyword",
-    "eval_script_linux": "192",
-    "eval_script_windows": "192",
-    "max_steps": 14
+    "eval_script_linux": "147",
+    "eval_script_windows": "147",
+    "max_steps": 16
   },
   {
     "id": "task_010",
-    "description": "Hard: multi-step pricing with discount, agent decides tool order",
-    "instruction": "Figure out the total price for 3 items costing $12.50, $8.25, and $15.00, apply a 10% discount on the total, save the discounted total to memory under the key 'final_total', and write that same amount into a file called receipt.txt. Then tell me the final amount.",
-    "eval_type": "keyword",
-    "eval_script_linux": "32.175",
-    "eval_script_windows": "32.175",
+    "description": "Hard: memory conditional + calculator + file + verification, agent decides tool order",
+    "instruction": "Check if a discount rate is stored in memory under 'discount_rate'. If not, assume a rate of 20%, save it to memory under that key. Then calculate the final price of a $150 item after applying this discount rate, save the final price to a file named final_price.txt, and read the file back to confirm the exact value before telling me the final price.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/final_price.txt && grep 120 workspace/final_price.txt",
+    "eval_script_windows": "if exist workspace\\final_price.txt findstr 120 workspace\\final_price.txt",
     "max_steps": 14
-  },
-  {
-    "id": "task_011",
-    "description": "Optional: web_search tool demonstration (known limitation — DuckDuckGo Instant Answer may return empty results for general questions)",
-    "instruction": "Search for information about Albert Einstein and tell me what he is known for.",
-    "eval_type": "keyword",
-    "eval_script_linux": "physicist",
-    "eval_script_windows": "physicist",
-    "max_steps": 6
   }
 ]
