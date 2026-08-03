@@ -9,7 +9,8 @@ OllamaClient::OllamaClient(const LLMConfig& config) :
     _baseURL(config.base_URL), 
     _modelName(config.model_name), 
     _temperature(config.temperature),
-    _numPredict(config.num_predict)
+    _numPredict(config.num_predict),
+    _numCtx(config.num_ctx)
 {};
 
 OllamaClient::~OllamaClient() = default;
@@ -32,7 +33,8 @@ LLMResponse OllamaClient::sendRequest(const std::vector<Message> &messages){
     json_payload["stream"] = false;
     json_payload["options"] = {
         {"temperature", _temperature},
-        {"num_predict", _numPredict}
+        {"num_predict", _numPredict},
+        {"num_ctx", _numCtx}
     };
     json json_messages = json::array();
     // Structutred bindings:

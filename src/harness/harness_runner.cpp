@@ -35,7 +35,8 @@ HarnessConfig HarnessRunner::readHarnessConfig(const fs::path& configPath) const
             .base_URL = config["llm"]["base_URL"],
             .model_name = config["llm"]["model_name"],
             .temperature = config["llm"]["temperature"],
-            .num_predict = config["llm"]["num_predict"]
+            .num_predict = config["llm"]["num_predict"],
+            .num_ctx = config["llm"]["num_ctx"]
         },
         .envConfig = {
             .mode = config["environment"]["mode"],
@@ -88,9 +89,9 @@ std::string HarnessRunner::toLower(const std::string& str) const{
 
 void HarnessRunner::archiveWorkspace(const std::string& taskId){
     try{
-        fs::path newArchivePath = fs::path("./archive") / ("Tasks" + taskId);
+        fs::path newArchivePath = fs::path(archivesPath) / (taskId);
         fs::create_directories(newArchivePath);
-        for(const auto& entry : fs::directory_iterator("./workspace")){
+        for(const auto& entry : fs::directory_iterator(config.envConfig.workspace)){
             fs::rename(entry, newArchivePath / entry.path().filename()); // Move all files from ./workspace to ./archive/TaskXX/ to store result
         }
     }
@@ -99,10 +100,13 @@ void HarnessRunner::archiveWorkspace(const std::string& taskId){
     }
 }
 
-HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsPath, const fs::path& tasksPath): 
+HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsPath, const fs::path& tasksPath, const fs::path& trajectoryPath, const fs::path& reportPath, const fs::path& archivePath):
     config(readHarnessConfig(configPath)),
     skillLoader(skillsPath),
-    threshold(config.thresholdConfig)
+    threshold(config.thresholdConfig),
+    trajectoriesPath(trajectoryPath),
+    reportsPath(reportPath),
+    archivesPath(archivePath)
 {
     client = std::make_unique<OllamaClient>(config.llmConfig);
     
@@ -130,6 +134,15 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
     }
     
     tasksList = readTasks(tasksPath);
+    try{
+        fs::create_directories(config.envConfig.workspace);
+        fs::create_directories(reportsPath);
+        fs::create_directories(trajectoriesPath);
+        fs::create_directories(archivesPath);
+    }
+    catch(const std::exception& e){
+        throw std::runtime_error(e.what());
+    }
 }
 
 double HarnessRunner::calcSuccessRate(int passCount, int numberOfTasks) const{
@@ -269,6 +282,7 @@ void HarnessRunner::exportBatchSummary(int passCount, double successRate, int to
 
 void HarnessRunner::runBatch(){
     int passCount = 0;
+    std::cout<<"START RUN BATCH...\n";
     for(const auto& task : tasksList){
         try{
             std::vector<std::string> necessarySkills = skillLoader.selectSkills(task.instruction);
@@ -303,21 +317,25 @@ void HarnessRunner::runBatch(){
             bool isPass = evaluator->evaluate(result.finalAnswer, task.eval_script_linux);
             #endif
 
-            exportTaskReport(task, result, isPass, "./report");
+            exportTaskReport(task, result, isPass, reportsPath);
 
             trajectory.setSuccess(isPass);
-            trajectory.exportToJson("./trajectory");
+            trajectory.exportToJson(trajectoriesPath);
 
             if(isPass){
                 ++passCount;
             }
             
             archiveWorkspace(task.id);
+
+            std::cout<<task.id<<" FINISH!\n";
         }
         catch(const std::exception& e){
             std::cerr << "Error: " << e.what() << "\n";
+            std::cout << task.id << " FINISH DUE TO ERROR!\n";
         }
     }
     double successRate = calcSuccessRate(passCount, tasksList.size());
-    exportBatchSummary(passCount, successRate, tasksList.size(), "./report");
+    exportBatchSummary(passCount, successRate, tasksList.size(), reportsPath);
+    std::cout<<"FINISH RUNNING BATCH!\n";
 }

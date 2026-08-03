@@ -1,0 +1,19 @@
+{
+  "llm": {
+    "base_URL": "DÁN ĐƯỜNG LINK NGROK CỦA THẦY VÀO ĐÂY/app/chat",
+    "model_name": "gemma4:e4b",
+    "temperature": 0.3,
+    "num_predict": 2048,
+    "num_ctx": 8192
+  },
+  "environment": {
+    "mode": "sandbox",
+    "workspace": "workspace/"
+  },
+  "loop_threshold": {
+    "repeat_warning": 2,
+    "repeat_critical": 3,
+    "pingpong_warning": 2,
+    "pingpong_critical": 3
+  }
+}
