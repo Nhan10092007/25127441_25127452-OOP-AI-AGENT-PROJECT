@@ -6,6 +6,10 @@
     "num_predict": 2048,
     "num_ctx": 8192
   },
+  "embedding": {
+    "base_URL": "https://your-ngrok-url.ngrok-free.dev/app/embed",
+    "model_name": "nomic-embed-text"
+  },
   "environment": {
     "mode": "sandbox",
     "workspace": "workspace/"
