@@ -1,0 +1,27 @@
+#include "type_press_tool.h"
+KeyboardTypeTool::KeyboardTypeTool() : Tool("type_text",
+                                            "Types a string of text at the current cursor focus. Mandatory JSON parameter: 'text' (string).")
+{
+    executor = KeyboardFactory::createExecutor();
+}
+
+std::string KeyboardTypeTool::execute(const std::string& args) {
+    if (args.empty()) {
+        return json{{"status", "error"}, {"message", "Missing arguments"}}.dump();
+    }
+
+    if (!json::accept(args)) {
+        return json{{"status", "error"}, {"message", "Invalid JSON format"}}.dump();
+    }
+
+    json parsed = json::parse(args);
+    if (!parsed.contains("text") || !parsed["text"].is_string()) {
+        return json{{"status", "error"}, {"message", "Missing or invalid 'text' parameter"}}.dump();
+    }
+
+    std::string text = parsed["text"].get<std::string>();
+    if (executor->typeText(text)) {
+        return json{{"status", "success"}, {"message", "Typed text successfully"}}.dump();
+    }
+    return json{{"status", "error"}, {"message", "OS keyboard execution failed"}}.dump();
+}

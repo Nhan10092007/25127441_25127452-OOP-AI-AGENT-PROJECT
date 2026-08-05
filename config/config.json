@@ -1,0 +1,18 @@
+{
+  "llm": {
+    "base_URL": "https://debug-animate-citizen.ngrok-free.dev/app/chat",
+    "model_name": "gemma4:e4b",
+    "temperature": 0.0,
+    "num_predict": 2048
+  },
+  "environment": {
+    "mode": "sandbox",
+    "workspace": "workspace/"
+  },
+  "loop_threshold": {
+    "repeat_warning": 2,
+    "repeat_critical": 3,
+    "pingpong_warning": 2,
+    "pingpong_critical": 3
+  }
+}

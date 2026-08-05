@@ -1,0 +1,101 @@
+[
+  {
+    "id": "task_001",
+    "description": "Basic arithmetic using calculator tool, write result to file",
+    "instruction": "Calculate 15 multiplied by 17. Save the result to result.txt",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/result.txt && grep 255 workspace/result.txt",
+    "eval_script_windows": "if exist workspace\\result.txt findstr 255 workspace\\result.txt",
+    "max_steps": 8
+  },
+  {
+    "id": "task_002",
+    "description": "Multi-step math requiring memory to store intermediate result",
+    "instruction": "Add 12 and 8, then multiply that result by 5. Tell me the final result.",
+    "eval_type": "keyword",
+    "eval_script_linux": "100",
+    "eval_script_windows": "100",
+    "max_steps": 10
+  },
+  {
+    "id": "task_003",
+    "description": "Simple file write and read back",
+    "instruction": "Write the string 'hello agent' to a file named greeting.txt, then read that file back and tell me its content.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/greeting.txt && grep 'hello agent' workspace/greeting.txt",
+    "eval_script_windows": "if exist workspace\\greeting.txt findstr \"hello agent\" workspace\\greeting.txt",
+    "max_steps": 8
+  },
+  {
+    "id": "task_004",
+    "description": "Memory save then search in the same task",
+    "instruction": "Save to memory with key 'city' and value 'Ho Chi Minh City'. Then look up the value of key 'city' and tell me the result.",
+    "eval_type": "keyword",
+    "eval_script_linux": "Ho Chi Minh City",
+    "eval_script_windows": "Ho Chi Minh City",
+    "max_steps": 8
+  },
+  {
+    "id": "task_005",
+    "description": "Web search for general knowledge",
+    "instruction": "Search for information about French Capital City.",
+    "eval_type": "keyword",
+    "eval_script_linux": "Paris",
+    "eval_script_windows": "Paris",
+    "max_steps": 6
+  },
+  {
+    "id": "task_006",
+    "description": "Exec tool listing files (sanity check for shell command execution)",
+    "instruction": "Run a command to list the files in the current directory and tell me how many files there are.",
+    "eval_type": "keyword",
+    "eval_script_linux": "file",
+    "eval_script_windows": "file",
+    "max_steps": 6
+  },
+  {
+    "id": "task_007",
+    "description": "True multi-step math requiring memory across 3 calculation stages",
+    "instruction": "Calculate the area of a rectangle with width 12 and height 7. Then calculate the area of a second rectangle with width 9 and height 15. Save both areas to memory with keys 'area1' and 'area2'. Finally, look up both values from memory and tell me their sum.",
+    "eval_type": "keyword",
+    "eval_script_linux": "219",
+    "eval_script_windows": "219",
+    "max_steps": 12
+},
+{
+    "id": "task_008",
+    "description": "Chained tool usage: calculate, write to file, read back, then verify with exec",
+    "instruction": "Calculate 8 to the power of 3, save the result to a file named cube.txt, then read the file back and use a shell command to check if the file exists and print its content.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/cube.txt && grep 512 workspace/cube.txt",
+    "eval_script_windows": "if exist workspace\\cube.txt findstr 512 workspace\\cube.txt",
+    "max_steps": 12
+},
+{
+    "id": "task_009",
+    "description": "Memory save/search with multiple distinct keys, testing retrieval accuracy (not just last-saved)",
+    "instruction": "Save three facts to memory: key 'fruit' with value 'apple', key 'color' with value 'red', key 'animal' with value 'tiger'. After saving all three, look up only the value for the key 'animal' and tell me what it is.",
+    "eval_type": "keyword",
+    "eval_script_linux": "tiger",
+    "eval_script_windows": "tiger",
+    "max_steps": 14
+},
+{
+    "id": "task_010",
+    "description": "Deliberately malformed-looking expression to test calculator robustness and error recovery",
+    "instruction": "Calculate the result of ((10 - 3) * 4) / (2 + 5), rounded reasoning is not needed, just give me the exact number.",
+    "eval_type": "keyword",
+    "eval_script_linux": "4",
+    "eval_script_windows": "4",
+    "max_steps": 8
+},
+{
+    "id": "task_011",
+    "description": "Read a non-existent file first, forcing the agent to handle a real error before recovering",
+    "instruction": "Read the content of a file named notes.txt. If it does not exist, create it with the content 'first run' instead, then confirm what you did.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/notes.txt && grep 'first run' workspace/notes.txt",
+    "eval_script_windows": "if exist workspace\\notes.txt findstr \"first run\" workspace\\notes.txt",
+    "max_steps": 10
+}
+]
