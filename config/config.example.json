@@ -6,6 +6,11 @@
     "num_predict": 2048,
     "num_ctx": 8192
   },
+  "embedding": {
+    "base_URL": "DÁN ĐƯỜNG LINK NGROK CỦA THẦY VÀO ĐÂY/app/embed",
+    "model_name": "nomic-embed-text",
+    "similarity_threshold": 0.75
+  },
   "environment": {
     "mode": "sandbox",
     "workspace": "workspace/"
