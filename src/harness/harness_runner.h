@@ -11,11 +11,13 @@
 #include<string>
 #include<filesystem>
 #include<agent/agent_loop.h>
+#include"client/embed_client.h"
 
 namespace fs = std::filesystem;
 
 struct HarnessConfig{
     LLMConfig llmConfig;
+    EmbeddingConfig embeddingConfig;
     EnvironmentConfig envConfig;
     LoopThreshold thresholdConfig;
 };
@@ -37,6 +39,7 @@ private:
     SkillLoader skillLoader;
     std::unique_ptr<LLMClient> client;
     std::unique_ptr<Environment> env;
+    std::unique_ptr<EmbeddingClient> embeddingClient;
     LoopThreshold threshold;
     std::vector<Task> tasksList;
     fs::path trajectoriesPath;
