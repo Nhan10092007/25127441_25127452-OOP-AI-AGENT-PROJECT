@@ -38,6 +38,11 @@ HarnessConfig HarnessRunner::readHarnessConfig(const fs::path& configPath) const
             .num_predict = config["llm"]["num_predict"],
             .num_ctx = config["llm"]["num_ctx"]
         },
+        .embeddingConfig = {
+            .model_name = config["embedding"]["model_name"],
+            .base_URL = config["embedding"]["base_URL"],
+            .similarity_threshold = config["embedding"]["similarity_threshold"]
+        },
         .envConfig = {
             .mode = config["environment"]["mode"],
             .workspace = config["environment"]["workspace"]
@@ -94,6 +99,9 @@ void HarnessRunner::archiveWorkspace(const std::string& taskId){
         for(const auto& entry : fs::directory_iterator(config.envConfig.workspace)){
             fs::rename(entry, newArchivePath / entry.path().filename()); // Move all files from ./workspace to ./archive/TaskXX/ to store result
         }
+        if(fs::exists("memory.db")){
+            fs::rename("memory.db", newArchivePath / "memory.db"); // Mỗi task sẽ có một database riêng, không xài chung nữa
+        }
     }
     catch(const std::exception& e){
         std::cerr<<"Error: " << e.what() << "\n";
@@ -109,16 +117,21 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
     archivesPath(archivePath)
 {
     client = std::make_unique<OllamaClient>(config.llmConfig);
-    
+    embeddingClient = std::make_unique<EmbeddingClient>(config.embeddingConfig);
+
     toolRegistry = std::make_shared<ToolRegistry>();
     
     toolRegistry->registerTool<CalculatorTool>("calculator");
     toolRegistry->registerTool<ExecTool>("exec");
     toolRegistry->registerTool<ReadFileTool>("read_file");
     toolRegistry->registerTool<WriteFileTool>("write_file");
-    toolRegistry->registerTool<MemorySave>("memory_save");
-    toolRegistry->registerTool<MemorySearch>("memory_search");
     toolRegistry->registerTool<WebTool>("web_search");
+    toolRegistry->registerToolFactory("memory_save", [this]() -> std::unique_ptr<Tool> {
+        return std::make_unique<MemorySave>(embeddingClient.get());
+    });
+    toolRegistry->registerToolFactory("memory_search", [this]() -> std::unique_ptr<Tool> {
+        return std::make_unique<MemorySearch>(embeddingClient.get(), config.embeddingConfig.similarity_threshold);
+    });
 
 
     std::string mode = toLower(config.envConfig.mode);
