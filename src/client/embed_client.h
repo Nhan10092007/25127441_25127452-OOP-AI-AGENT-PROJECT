@@ -5,6 +5,7 @@
 struct EmbeddingConfig{
     std::string model_name;
     std::string base_URL;
+    double similarity_threshold;
 };
 
 class EmbeddingClient{
@@ -14,5 +15,5 @@ private:
 public:
     EmbeddingClient(const EmbeddingConfig& config);
     ~EmbeddingClient();
-    std::vector<double> embed(const std::string& text);
+    std::vector<float> embed(const std::string& text);
 };
