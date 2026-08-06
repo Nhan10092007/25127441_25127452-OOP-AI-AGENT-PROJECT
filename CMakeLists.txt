@@ -32,11 +32,11 @@ src/agent/loop_detector.cpp
 src/agent/skill_loader.cpp
 )
 set(TOOL_SOURCE 
-src/tools/calculator_tool.cpp
-src/tools/exec_tool.cpp
-src/tools/file_tool.cpp
-src/tools/memory_tool.cpp
-src/tools/web_tool.cpp
+src/tools/calculator/calculator_tool.cpp
+src/tools/exec/exec_tool.cpp
+src/tools/file/file_tool.cpp
+src/tools/memory/memory_tool.cpp
+src/tools/web/web_tool.cpp
 src/tools/tool_registry.cpp
 )
 set(HARNESS_SOURCE

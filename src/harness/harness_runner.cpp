@@ -4,11 +4,11 @@
 #include<stdexcept>
 #include<sstream>
 #include"client/llm_client.h"
-#include"tools/calculator_tool.h"
-#include"tools/exec_tool.h"
-#include"tools/web_tool.h"
-#include"tools/file_tool.h"
-#include"tools/memory_tool.h"
+#include"tools/calculator/calculator_tool.h"
+#include"tools/exec/exec_tool.h"
+#include"tools/web/web_tool.h"
+#include"tools/file/file_tool.h"
+#include"tools/memory/memory_tool.h"
 #include<iostream>
 #include"trajectory.h"
 #include"keyword_evaluator.h"
