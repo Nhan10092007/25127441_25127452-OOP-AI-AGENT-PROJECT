@@ -13,8 +13,6 @@ std::string ScreenshotTool::execute(const std::string& args) {
     if (!args.empty()) {
         if (json::accept(args)) {
             json parsed = json::parse(args);
-            
-            // 3. Kiểm tra an toàn: Tồn tại key "filename" VÀ giá trị của nó phải là kiểu chuỗi (string)
             if (parsed.contains("filename") && parsed["filename"].is_string()) {
                 filename = parsed["filename"].get<std::string>();
             }
