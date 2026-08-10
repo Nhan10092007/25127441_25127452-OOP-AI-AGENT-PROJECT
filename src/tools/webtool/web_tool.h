@@ -1,5 +1,5 @@
 #pragma once
-#include "tool.h"
+#include "./tool.h"
 #include <string>
 
 class WebTool : public Tool {
