@@ -7,7 +7,7 @@
 using json = nlohmann::json;
 
 WebTool::WebTool() 
-    : Tool("web_search", "Tool for searching information on DuckDuckGo. Args parameter: Must be a JSON object containing the field 'query' (the search keywords, required). May also include 'skip_disambig' (boolean, optional, default: true) and 'no_html' (boolean, optional, default: true). In most cases, only 'query' is needed.") {}
+    : Tool("web_search", "Tool for searching information on DuckDuckGo. Args parameter: Must be a JSON object containing the field 'query' (the search keywords, required). May also include 'skip_disambig' (boolean, optional, default: true) and 'no_html' (boolean, optional, default: true). In most cases, only 'query' is needed. IMPORTANT: this API responds best to short, specific entity names (e.g., 'Albert Einstein', 'Python programming language') rather than full natural-language questions (e.g., 'what is the capital of France'). Prefer the specific entity/term over the full question.") {}
 
 std::string WebTool::execute(const std::string& args){
     json input = json::parse(args);

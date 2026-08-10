@@ -9,6 +9,7 @@
 ## Hướng dẫn thứ tự chạy các Cell trong Google Colab:
 **Đường dẫn đến Google Colab mà nhóm em đã chuẩn bị: [Google Colab link](https://colab.research.google.com/drive/1n_PJcvaE19ps4LB-QGNtnnffFAa4_Pb0?usp=sharing)**<br>
 Do chúng em đã setup hết trên Google Colab nên thầy chỉ việc chạy các cell theo thứ tự sau:
+- **Kết nối GPU của Google Colab**: Khi vào giao diện của Google Colab trong đường link mà em đã gửi, ở góc phải bên trên, ta sẽ thấy có chữ `Kết nối`. Thầy phải ấn vô đó để nó kết nối với GPU. (Phải có GPU hỗ trợ nếu không sẽ không chạy được model)
 - **Cell 1**: Chạy script setup môi trường và cài các thư viện python cần thiết
 ```bash
 !sudo apt update
@@ -23,15 +24,12 @@ import os
 env = os.environ.copy()
 env["OLLAMA_HOST"] = "0.0.0.0" 
 env["OLLAMA_ORIGINS"] = "*" 
-
 import subprocess
 def run_ollama_serve():
   subprocess.Popen(["ollama", "serve"], env=env)
-
 import threading
 thread = threading.Thread(target = run_ollama_serve)
 thread.start()
-
 import time
 time.sleep(5)
 ```
@@ -47,26 +45,21 @@ from pydantic import BaseModel
 import httpx
 import threading
 from typing import List, Dict, Any
-
 class DataInput(BaseModel):
   model: str
   messages: List[Dict[str, Any]]
   stream: bool = False
   options: Dict[str, Any]
-
 app = FastAPI()
 ollama_url = "http://127.0.0.1:11434/api/chat"
-
 @app.post("/app/chat")
 async def chat_endpoint(payload: DataInput):
   valid_data = payload.model_dump()
-
   try:
     async with httpx.AsyncClient(timeout = 120.0) as client:
       response = await client.post(ollama_url, json=valid_data)
       response.raise_for_status()
       ollama_response = response.json()
-
       filter_response = {
           "response" : ollama_response.get("message", {}).get("content",""),
           "prompt_token" : ollama_response.get("prompt_eval_count", 0),
@@ -74,33 +67,104 @@ async def chat_endpoint(payload: DataInput):
           "total_token" : ollama_response.get("prompt_eval_count", 0) + ollama_response.get("eval_count", 0),
           "success" : ollama_response.get("done", False),
       }
-
       return filter_response
-
   except Exception as e:
     return {"error" : str(e) }
-
 def run_uvicorn_sever():
   uvicorn.run(app, host = "0.0.0.0", port = 8000)
-
 thread = threading.Thread(target = run_uvicorn_sever, daemon = True)
 thread.start()
-
 print("Uvicorn sever run on http://0.0.0.0:8000")
 ```
 - **Cell 5**: Thiết lập Tunnels để kết nối với code c++ bằng `ngrok` (**Lưu ý: Thầy cần xem phần `Hướng dẫn lấy ngrok Authtoken` ở dưới trước khi chạy Cell này**)
 ```python
-
+from pyngrok import ngrok
+ngrok.kill()
+ngrok.set_auth_token("DÁN MÃ NGROK CÁ NHÂN CỦA THẦY VÀO ĐÂY")
+port = 8000
+public_url = ngrok.connect(port).public_url
+print("Ngrok tunnels connecting from local c++ code to Uvicorn sever: ", public_url)
 ```
-- **Cell 6**: Tắt Tunnels hiện tại của `ngrok` (**Lưu ý: Thầy chỉ chạy Cell này khi đã test xong**)
+Sau khi chạy cell này xong, nó sẽ hiện ra dòng:
+```bash
+Ngrok tunnels connecting from local c++ code to Uvicorn sever:  https://debug-animate-citizen.ngrok-free.dev
+```
+Thầy hãy copy đường link `https://debug-animate-citizen.ngrok-free.dev` và ấn cell tiếp theo.
+
+- **Cell 6**: Chạy Warm-up để tải model lên VRAM:
+```python
+import httpx
+import time
+api_url = "http://127.0.0.1:8000/app/chat"
+payload = {
+    "model": "gemma4:e4b",
+    "messages": [
+        {"role": "user", "content": "hi"}
+    ],
+    "stream": False,
+    "options": {
+        "num_predict": 1
+    }
+}
+start_time = time.time()
+try:
+    response = httpx.post(api_url, json=payload, timeout=180.0)
+    response.raise_for_status()
+
+    data = response.json()
+    end_time = time.time()
+
+    print(f"Warm-up finish sucessfully in {end_time - start_time:.2f} seconds!")
+    print(f"response: {data}")
+except Exception as e:
+    print(f"Error during warm-up: {type(e).__name__}: {str(e)}")
+```
+
+**SAU KHI ẤN XONG CELL 6 THÌ COI NHƯ TA ĐÃ HOÀN TẤT THIẾT LẬP OLLAMA API VÀ CHUYỂN SANG BƯỚC TIẾP THEO `Hướng dẫn cấu hình model trong dự án`**
+
+- **Cell 7**: Tắt Tunnels hiện tại của `ngrok` (**Lưu ý: Thầy chỉ chạy Cell này khi đã test xong**)
 ```python
 ngrok.kill()
 ```
 
 ## Hướng dẫn lấy ngrok Authtoken:
-- **Bước 1**: Truy cập: [ngrok.com](https://ngrok.com/) và thực hiện đăng kí tài khoản
+- **Bước 1**: Truy cập: [ngrok.com](https://ngrok.com/) và thực hiện đăng kí tài khoản.
 - **Bước 2**: Khi đăng kí xong, ta vào phần `Setup & Installation`, ở mục `Your Authtoken`, ta ấn nút copy để lấy Authtoken.
-- **Bước 3**: 
+- **Bước 3**: Dán Authtoken vào **cell 5** ở dòng:
+```python
+ngrok.set_auth_token("DÁN MÃ NGROK CÁ NHÂN CỦA THẦY VÀO ĐÂY")
+```
+Thầy hãy thay chữ `DÁN MÃ NGROK CÁ NHÂN CỦA THẦY VÀO ĐÂY` bằng Authtoken của thầy.
+
+## Hướng dẫn cấu hình model trong dự án:
+- **Bước 1**: Trong thư mục dự án, thầy sẽ thấy có một thư mục `config/` và trong đó sẽ có file `config.example.json`. Thầy hãy đổi tên file ấy thành `config.json`.
+- **Bước 2**: Trong file `config.json` ta sẽ thấy:
+```python
+{
+  "llm": {
+    "base_URL": "DÁN ĐƯỜNG LINK NGROK CỦA THẦY VÀO ĐÂY/app/chat",
+    "model_name": "gemma4:e4b",
+    "temperature": 0.3,
+    "num_predict": 2048,
+    "num_ctx": 8192
+  },
+  "environment": {
+    "mode": "sandbox",
+    "workspace": "workspace/"
+  },
+  "loop_threshold": {
+    "repeat_warning": 2,
+    "repeat_critical": 3,
+    "pingpong_warning": 2,
+    "pingpong_critical": 3
+  }
+}
+```
++ Các field thầy nên giữ nguyên: `model_name` (model mặc định theo gợi ý đồ án), `num_ctx`,  `num_predict`, `mode` (Ta nên ưu tiên test bằng chế độ sandbox thay vì native), `workspace` (thư mục cho các hoạt động của write_file và read_file tool trong sandbox mode).
++ `base_URL`: Thầy sẽ dán đường link Ngrok mà nãy thầy đã copy trong Google Colab vào phần `DÁN ĐƯỜNG LINK NGROK CỦA THẦY VÀO ĐÂY` (Lưu ý: Thầy phải giữ nguyên endpoint `/app/chat`).
++ `temperature`: Thầy nên giữ chỉ số này ở khoảng 0.0 - 0.3.
++ `loop_threshold`: Đây là cấu hình cho `LoopDetector`. Trong đó, `pingpong_warning` và `repeat_warning` được dùng để kích hoạt cảnh báo sớm. Nếu số lần lặp chạm ngưỡng tối đa là `pingpong_critical` hoặc `repeat_critical`, tiến trình của task sẽ bị hủy ngay lập tức.
+
 
 # B. Hướng dẫn cài đặt và biên dịch:
 
@@ -240,9 +304,31 @@ export CXX=$(brew --prefix llvm)/bin/clang++
 - **Bước 2**: Tiến hành biên dịch (build) và chạy chương trình (Sử dụng lệnh này cho mọi lần chạy sau khi sửa code):
   - **Đối với người dùng Windows:**
     ```bash
-    cmake --build build && ./build/agent_runner.exe
+    cmake --build build ; ./build/agent_runner.exe
     ```
   - **Đối với người dùng Linux / macOS:**
     ```bash
     cmake --build build && ./build/agent_runner
     ```
+
+# Xem kết quả sau khi chạy chương trình:
+
+Sau khi chạy xong, nếu thầy thấy kết quả trên terminal hiện như sau:
+```bash
+START RUN BATCH...
+task_001 FINISH!
+task_002 FINISH!
+task_003 FINISH!
+task_004 FINISH!
+task_005 FINISH!
+task_006 FINISH!
+task_007 FINISH!
+task_008 FINISH!
+task_009 FINISH!
+task_010 FINISH!
+FINISH RUNNING BATCH!
+```
+Nó có nghĩa là tất cả các tasks đã được hoành thành xong và thầy có thể xem kết quả ở các thư mục sau:
+1. `trajectory/`: Đây là nơi ghi lại chi tiết các quyết định, suy nghĩ và hành động của agent từ đầu đến cuối. Nó cho ta biết được các thông tin như: task đấy có thành công hay không, token mà task đó sử dụng là bao nhiêu, thời gian thực thi task, suy nghĩ và hành động của AI khi giải quyết tasks,.... Giúp ta có cái nhìn tổng quát nhất về quy trình thực hiện của agent với vòng lặp ReAct.
+2. `archive/`: Là nơi lưu trữ các directories/files mà AI tạo ra theo yêu cầu của task (được chuyển qua từ `workspace/`). Với các tasks yêu cầu AI ghi kết quả ra file thì ta có thể kiểm tra trực tiếp các file kết quả ấy trong thư mục này để xem agent có thực hiện đúng hay chưa.
+3. `report/`: Đây là nơi lưu trữ các tệp `messages.json` ghi lại conversation history của từng task. Điều này giúp ta có thể dễ dàng xem được những lỗi mà ta gặp phải là gì và AI đã suy nghĩ như thế nào khi nhận task và giải quyết. Ngoài ra trong thư mục này còn lưu trữ các file `result.txt` ghi lại các thông tin như: Thực thi thành công hay không, final awnser của agent dành cho task đó, số step cần để giải quyết bằng cách đó và nhận xét về khả năng thực thi của agent dựa trên số step (Hoàn thành với mức step thấp -> Hiệu quả cao).

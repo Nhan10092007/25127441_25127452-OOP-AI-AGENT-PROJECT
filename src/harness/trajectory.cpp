@@ -80,6 +80,6 @@ void Trajectory::exportToJson(const fs::path& filePath){
         file.close();
     }
     catch(const std::exception& e){
-        throw std::runtime_error(std::string("Error: ") + e.what()); // std::string operator+(const char*, const std::string&);
+        throw std::runtime_error(e.what());
     }
 }

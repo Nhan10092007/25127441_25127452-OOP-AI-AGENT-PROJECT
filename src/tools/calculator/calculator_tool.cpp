@@ -5,6 +5,8 @@
 #include <cmath>
 #include <cctype>
 #include <stdexcept>
+#include<iomanip>
+#include<sstream>
 
 CalculatorTool::CalculatorTool() 
     : Tool("calculator", "Tool for performing basic arithmetic operations. Args parameter: a string containing the expression to calculate (supports +, -, *, /, ^ and parentheses). (example: '(2+3)^2*4-1')") {}
@@ -174,5 +176,8 @@ std::string CalculatorTool::execute(const std::string& args) {
     std::vector<std::string> tokens;
     tokenize(args, tokens);
     double result = calculateExpression(tokens);
-    return std::to_string(result);
+    result = std::round(result * 1e6) / 1e6;
+    std::ostringstream oss;
+    oss << std::setprecision(10) << result;
+    return oss.str();
 }

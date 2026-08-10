@@ -2,8 +2,14 @@
   "llm": {
     "base_URL": "https://debug-animate-citizen.ngrok-free.dev/app/chat",
     "model_name": "gemma4:e4b",
-    "temperature": 0.0,
-    "num_predict": 2048
+    "temperature": 0.3,
+    "num_predict": 2048,
+    "num_ctx": 8192
+  },
+  "embedding": {
+    "base_URL": "https://debug-animate-citizen.ngrok-free.dev/app/embed",
+    "model_name": "nomic-embed-text",
+    "similarity_threshold": 0.75
   },
   "environment": {
     "mode": "sandbox",

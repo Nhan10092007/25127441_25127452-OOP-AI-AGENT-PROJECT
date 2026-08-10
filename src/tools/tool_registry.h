@@ -16,6 +16,7 @@ public:
             return std::make_unique<T>(); 
         };
     }
+    void registerToolFactory(const std::string& toolName, std::function<std::unique_ptr<Tool>()> factory);
     std::unique_ptr<Tool> createTool(const std::string& toolName) const;
     std::string getToolsDescription() const;
 };

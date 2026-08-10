@@ -124,7 +124,7 @@ AgentResult AgentLoop::run(std::vector<Message> initialMessages) {
                 record.latency_ms = latency_ms;
                 hook(record);
             }
-            return AgentResult{false, std::string("Failed due to network error: ") + e.what(), this->messages, current_step + 1};
+            return AgentResult{false, e.what(), this->messages, current_step + 1};
         }
 
         this->messages.push_back(Message{"assistant", llmResponse.response, {}});

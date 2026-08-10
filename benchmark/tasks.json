@@ -1,101 +1,92 @@
 [
   {
     "id": "task_001",
-    "description": "Basic arithmetic using calculator tool, write result to file",
-    "instruction": "Calculate 15 multiplied by 17. Save the result to result.txt",
-    "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/result.txt && grep 255 workspace/result.txt",
-    "eval_script_windows": "if exist workspace\\result.txt findstr 255 workspace\\result.txt",
-    "max_steps": 8
+    "description": "Simple: calculation",
+    "instruction": "A store sells notebooks at $4.50 each. Calculate the total cost of buying 15 notebooks, then tell me the exact total price.",
+    "eval_type": "keyword",
+    "eval_script_linux": "67.5",
+    "eval_script_windows": "67.5",
+    "max_steps": 6
   },
   {
     "id": "task_002",
-    "description": "Multi-step math requiring memory to store intermediate result",
-    "instruction": "Add 12 and 8, then multiply that result by 5. Tell me the final result.",
-    "eval_type": "keyword",
-    "eval_script_linux": "100",
-    "eval_script_windows": "100",
-    "max_steps": 10
+    "description": "Simple: multi-line file write/read",
+    "instruction": "Write a two-line note to a file named memo.txt: first line 'Team standup at 9am', second line 'Bring the sprint board'. Then read the file back and tell me its full content.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/memo.txt && grep -q 'Bring the sprint board' workspace/memo.txt && grep -q 'Team standup at 9am' workspace/memo.txt",
+    "eval_script_windows": "if exist workspace\\memo.txt (findstr /C:\"Bring the sprint board\" workspace\\memo.txt && findstr /C:\"Team standup at 9am\" workspace\\memo.txt) else exit 1",
+    "max_steps": 8
   },
   {
     "id": "task_003",
-    "description": "Simple file write and read back",
-    "instruction": "Write the string 'hello agent' to a file named greeting.txt, then read that file back and tell me its content.",
+    "description": "Simple: directory listing via exec, saved into workspace",
+    "instruction": "Use a shell command to list the files currently in the workspace directory, then save that exact output into a file named listing.txt inside the workspace.",
     "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/greeting.txt && grep 'hello agent' workspace/greeting.txt",
-    "eval_script_windows": "if exist workspace\\greeting.txt findstr \"hello agent\" workspace\\greeting.txt",
+    "eval_script_linux": "test -s workspace/listing.txt",
+    "eval_script_windows": "if not exist workspace\\listing.txt (exit /b 1) else (findstr /R \".\" workspace\\listing.txt >nul)",
     "max_steps": 8
   },
   {
     "id": "task_004",
-    "description": "Memory save then search in the same task",
-    "instruction": "Save to memory with key 'city' and value 'Ho Chi Minh City'. Then look up the value of key 'city' and tell me the result.",
+    "description": "Simple: web_search lookup",
+    "instruction": "Search for information about Isaac Newton and tell me what scientific law or theory he is most famous for.",
     "eval_type": "keyword",
-    "eval_script_linux": "Ho Chi Minh City",
-    "eval_script_windows": "Ho Chi Minh City",
+    "eval_script_linux": "gravit",
+    "eval_script_windows": "gravit",
     "max_steps": 8
   },
   {
     "id": "task_005",
-    "description": "Web search for general knowledge",
-    "instruction": "Search for information about French Capital City.",
+    "description": "Medium: memory conditional + calculator",
+    "instruction": "Check memory for a key called 'tax_rate'. If it is not found, calculate 8% tax on a $294 purchase, save that computed tax amount under 'tax_rate', then tell me the tax amount.",
     "eval_type": "keyword",
-    "eval_script_linux": "Paris",
-    "eval_script_windows": "Paris",
-    "max_steps": 6
+    "eval_script_linux": "23.52",
+    "eval_script_windows": "23.52",
+    "max_steps": 10
   },
   {
     "id": "task_006",
-    "description": "Exec tool listing files (sanity check for shell command execution)",
-    "instruction": "Run a command to list the files in the current directory and tell me how many files there are.",
-    "eval_type": "keyword",
-    "eval_script_linux": "file",
-    "eval_script_windows": "file",
-    "max_steps": 6
+    "description": "Medium: file conditional + exec verification (3 tools)",
+    "instruction": "Read a file named settings.txt. If it does not exist, create it with the content 'mode=production', then use a shell command to display the file's content back to confirm it was written correctly.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/settings.txt && grep -q 'mode=production' workspace/settings.txt",
+    "eval_script_windows": "if exist workspace\\settings.txt (findstr /C:\"mode=production\" workspace\\settings.txt) else (exit /b 1)",
+    "max_steps": 12
   },
   {
     "id": "task_007",
-    "description": "True multi-step math requiring memory across 3 calculation stages",
-    "instruction": "Calculate the area of a rectangle with width 12 and height 7. Then calculate the area of a second rectangle with width 9 and height 15. Save both areas to memory with keys 'area1' and 'area2'. Finally, look up both values from memory and tell me their sum.",
+    "description": "Medium: web_search + memory caching",
+    "instruction": "Search for information about the C++ programming language, save a key fact about who created it to memory under the key 'cpp_info', then look it up again from memory and tell me what it says.",
     "eval_type": "keyword",
-    "eval_script_linux": "219",
-    "eval_script_windows": "219",
-    "max_steps": 12
-},
-{
-    "id": "task_008",
-    "description": "Chained tool usage: calculate, write to file, read back, then verify with exec",
-    "instruction": "Calculate 8 to the power of 3, save the result to a file named cube.txt, then read the file back and use a shell command to check if the file exists and print its content.",
-    "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/cube.txt && grep 512 workspace/cube.txt",
-    "eval_script_windows": "if exist workspace\\cube.txt findstr 512 workspace\\cube.txt",
-    "max_steps": 12
-},
-{
-    "id": "task_009",
-    "description": "Memory save/search with multiple distinct keys, testing retrieval accuracy (not just last-saved)",
-    "instruction": "Save three facts to memory: key 'fruit' with value 'apple', key 'color' with value 'red', key 'animal' with value 'tiger'. After saving all three, look up only the value for the key 'animal' and tell me what it is.",
-    "eval_type": "keyword",
-    "eval_script_linux": "tiger",
-    "eval_script_windows": "tiger",
-    "max_steps": 14
-},
-{
-    "id": "task_010",
-    "description": "Deliberately malformed-looking expression to test calculator robustness and error recovery",
-    "instruction": "Calculate the result of ((10 - 3) * 4) / (2 + 5), rounded reasoning is not needed, just give me the exact number.",
-    "eval_type": "keyword",
-    "eval_script_linux": "4",
-    "eval_script_windows": "4",
-    "max_steps": 8
-},
-{
-    "id": "task_011",
-    "description": "Read a non-existent file first, forcing the agent to handle a real error before recovering",
-    "instruction": "Read the content of a file named notes.txt. If it does not exist, create it with the content 'first run' instead, then confirm what you did.",
-    "eval_type": "functional",
-    "eval_script_linux": "test -f workspace/notes.txt && grep 'first run' workspace/notes.txt",
-    "eval_script_windows": "if exist workspace\\notes.txt findstr \"first run\" workspace\\notes.txt",
+    "eval_script_linux": "Stroustrup",
+    "eval_script_windows": "Stroustrup",
     "max_steps": 10
-}
+  },
+  {
+    "id": "task_008",
+    "description": "Medium: 4-tool sequential chain",
+    "instruction": "Calculate the square root of 144 by raising 144 to the power of 0.5, write the result to a file named sqrt_result.txt in the format 'sqrt result: <value>' (e.g. 'sqrt result: 12'), use a shell command to display that file's content, and finally read the file directly using the file-reading tool to confirm the value.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/sqrt_result.txt && grep -q 'sqrt result: 12' workspace/sqrt_result.txt",
+    "eval_script_windows": "if exist workspace\\sqrt_result.txt (findstr /C:\"sqrt result: 12\" workspace\\sqrt_result.txt) else (exit /b 1)",
+    "max_steps": 12
+  },
+  {
+    "id": "task_009",
+    "description": "Hard: web_search + calculator + memory + file, agent decides tool order",
+    "instruction": "I want to know how many years ago Charles Darwin was born, based on his birth year and today's year 2026. Search for confirmation of his birth year, calculate the number of years since then, save that number to memory under 'darwin_age_years', and write it into a file named darwin_fact.txt. Tell me the final number.",
+    "eval_type": "keyword",
+    "eval_script_linux": "217",
+    "eval_script_windows": "217",
+    "max_steps": 16
+  },
+  {
+    "id": "task_010",
+    "description": "Hard: memory conditional + calculator + file + verification, agent decides tool order",
+    "instruction": "Check if a membership discount is stored in memory under 'member_discount'. If not, assume a discount of 25%, save it to memory under that key. Then calculate the final price of a $200 item after applying this discount, save the final price to a file named member_price.txt in the format 'final price: <value>' (e.g. 'final price: 150'), and read the file back to confirm the exact value before telling me the final price.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/member_price.txt && grep -q 'final price: 150' workspace/member_price.txt",
+    "eval_script_windows": "if exist workspace\\member_price.txt (findstr /C:\"final price: 150\" workspace\\member_price.txt) else (exit /b 1)",
+    "max_steps": 14
+  }
 ]

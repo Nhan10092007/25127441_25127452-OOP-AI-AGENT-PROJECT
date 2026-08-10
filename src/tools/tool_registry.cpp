@@ -21,3 +21,7 @@ std::string ToolRegistry::getToolsDescription() const{
     }
     return result;
 }
+
+void ToolRegistry::registerToolFactory(const std::string& toolName, std::function<std::unique_ptr<Tool>()> factory){
+    factories[toolName] = factory;
+}
