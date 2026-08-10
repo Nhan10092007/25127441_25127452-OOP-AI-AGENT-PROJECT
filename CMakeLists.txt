@@ -38,6 +38,13 @@ src/tools/file/file_tool.cpp
 src/tools/memory/memory_tool.cpp
 src/tools/web/web_tool.cpp
 src/tools/tool_registry.cpp
+src/tools/guiagent/screenshot/screenshot_tool.cpp
+src/tools/guiagent/screenshot/helper/screenshot_capture.cpp
+src/tools/guiagent/screenshot/helper/encodeBase64.cpp
+src/tools/guiagent/mouse_click/mouse_click_tool.cpp
+src/tools/guiagent/mouse_click/helper/mouse_executor.cpp
+src/tools/guiagent/keyboard_type/type_press_tool.cpp
+src/tools/guiagent/keyboard_type/helper/keyboard_executor.cpp
 )
 set(HARNESS_SOURCE
 src/harness/functional_evaluator.cpp
