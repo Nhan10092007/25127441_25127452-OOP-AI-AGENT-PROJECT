@@ -1,5 +1,5 @@
 #pragma once
-#include "tool.h"
+#include "./tool.h"
 #include <sqlite3.h>
 
 class MemorySave : public Tool {
