@@ -1,5 +1,9 @@
 #pragma once
+<<<<<<<< HEAD:src/tools/webtool/web_tool.h
 #include "./tool.h"
+========
+#include "tools/tool.h"
+>>>>>>>> origin/develop:src/tools/web/web_tool.h
 #include <string>
 
 class WebTool : public Tool {

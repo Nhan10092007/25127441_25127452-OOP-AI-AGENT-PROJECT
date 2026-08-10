@@ -6,7 +6,7 @@
 int main(){
     curl_global_init(CURL_GLOBAL_ALL);
     try{
-        HarnessRunner runner("./config/config.json", "./skills", "./benchmark/tasks.json");
+        HarnessRunner runner("./config/config.json", "./skills", "./benchmark/tasks.json", "./trajectory", "./report", "./archive");
         runner.runBatch();
     }
     catch(const std::exception& e){

@@ -1,5 +1,5 @@
 #pragma once
-#include "./tool.h"
+#include "tools/tool.h"
 #include <optional>
 class CalculatorTool : public Tool {
 public:

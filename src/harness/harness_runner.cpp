@@ -4,14 +4,11 @@
 #include<stdexcept>
 #include<sstream>
 #include"client/llm_client.h"
-#include"./tools/calculator/calculator_tool.h"
-#include"./tools/exec/exec_tool.h"
-#include"./tools/file/file_tool.h"
-#include"./tools/memory/memory_tool.h"
-#include"./tools/webtool/web_tool.h"
-#include"./tools/guiagent/screenshot/sceenshot_tool.h"
-#include"./tools/guiagent/mouse_click/mouse_click_tool.h"
-#include"./tools/guiagent/keyboard_type/type_press_tool.h"
+#include"tools/calculator/calculator_tool.h"
+#include"tools/exec/exec_tool.h"
+#include"tools/web/web_tool.h"
+#include"tools/file/file_tool.h"
+#include"tools/memory/memory_tool.h"
 #include<iostream>
 #include"trajectory.h"
 #include"keyword_evaluator.h"
@@ -38,7 +35,13 @@ HarnessConfig HarnessRunner::readHarnessConfig(const fs::path& configPath) const
             .base_URL = config["llm"]["base_URL"],
             .model_name = config["llm"]["model_name"],
             .temperature = config["llm"]["temperature"],
-            .num_predict = config["llm"]["num_predict"]
+            .num_predict = config["llm"]["num_predict"],
+            .num_ctx = config["llm"]["num_ctx"]
+        },
+        .embeddingConfig = {
+            .model_name = config["embedding"]["model_name"],
+            .base_URL = config["embedding"]["base_URL"],
+            .similarity_threshold = config["embedding"]["similarity_threshold"]
         },
         .envConfig = {
             .mode = config["environment"]["mode"],
@@ -91,10 +94,13 @@ std::string HarnessRunner::toLower(const std::string& str) const{
 
 void HarnessRunner::archiveWorkspace(const std::string& taskId){
     try{
-        fs::path newArchivePath = fs::path("./archive") / ("Tasks" + taskId);
+        fs::path newArchivePath = fs::path(archivesPath) / (taskId);
         fs::create_directories(newArchivePath);
-        for(const auto& entry : fs::directory_iterator("./workspace")){
+        for(const auto& entry : fs::directory_iterator(config.envConfig.workspace)){
             fs::rename(entry, newArchivePath / entry.path().filename()); // Move all files from ./workspace to ./archive/TaskXX/ to store result
+        }
+        if(fs::exists("memory.db")){
+            fs::rename("memory.db", newArchivePath / "memory.db"); // Mỗi task sẽ có một database riêng, không xài chung nữa
         }
     }
     catch(const std::exception& e){
@@ -102,22 +108,30 @@ void HarnessRunner::archiveWorkspace(const std::string& taskId){
     }
 }
 
-HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsPath, const fs::path& tasksPath): 
+HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsPath, const fs::path& tasksPath, const fs::path& trajectoryPath, const fs::path& reportPath, const fs::path& archivePath):
     config(readHarnessConfig(configPath)),
     skillLoader(skillsPath),
-    threshold(config.thresholdConfig)
+    threshold(config.thresholdConfig),
+    trajectoriesPath(trajectoryPath),
+    reportsPath(reportPath),
+    archivesPath(archivePath)
 {
     client = std::make_unique<OllamaClient>(config.llmConfig);
-    
+    embeddingClient = std::make_unique<EmbeddingClient>(config.embeddingConfig);
+
     toolRegistry = std::make_shared<ToolRegistry>();
     
     toolRegistry->registerTool<CalculatorTool>("calculator");
     toolRegistry->registerTool<ExecTool>("exec");
     toolRegistry->registerTool<ReadFileTool>("read_file");
     toolRegistry->registerTool<WriteFileTool>("write_file");
-    toolRegistry->registerTool<MemorySave>("memory_save");
-    toolRegistry->registerTool<MemorySearch>("memory_search");
     toolRegistry->registerTool<WebTool>("web_search");
+    toolRegistry->registerToolFactory("memory_save", [this]() -> std::unique_ptr<Tool> {
+        return std::make_unique<MemorySave>(embeddingClient.get());
+    });
+    toolRegistry->registerToolFactory("memory_search", [this]() -> std::unique_ptr<Tool> {
+        return std::make_unique<MemorySearch>(embeddingClient.get(), config.embeddingConfig.similarity_threshold);
+    });
 
 
     std::string mode = toLower(config.envConfig.mode);
@@ -133,6 +147,15 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
     }
     
     tasksList = readTasks(tasksPath);
+    try{
+        fs::create_directories(config.envConfig.workspace);
+        fs::create_directories(reportsPath);
+        fs::create_directories(trajectoriesPath);
+        fs::create_directories(archivesPath);
+    }
+    catch(const std::exception& e){
+        throw std::runtime_error(e.what());
+    }
 }
 
 double HarnessRunner::calcSuccessRate(int passCount, int numberOfTasks) const{
@@ -272,6 +295,7 @@ void HarnessRunner::exportBatchSummary(int passCount, double successRate, int to
 
 void HarnessRunner::runBatch(){
     int passCount = 0;
+    std::cout<<"START RUN BATCH...\n";
     for(const auto& task : tasksList){
         try{
             std::vector<std::string> necessarySkills = skillLoader.selectSkills(task.instruction);
@@ -306,21 +330,25 @@ void HarnessRunner::runBatch(){
             bool isPass = evaluator->evaluate(result.finalAnswer, task.eval_script_linux);
             #endif
 
-            exportTaskReport(task, result, isPass, "./report");
+            exportTaskReport(task, result, isPass, reportsPath);
 
             trajectory.setSuccess(isPass);
-            trajectory.exportToJson("./trajectory");
+            trajectory.exportToJson(trajectoriesPath);
 
             if(isPass){
                 ++passCount;
             }
             
             archiveWorkspace(task.id);
+
+            std::cout<<task.id<<" FINISH!\n";
         }
         catch(const std::exception& e){
             std::cerr << "Error: " << e.what() << "\n";
+            std::cout << task.id << " FINISH DUE TO ERROR!\n";
         }
     }
     double successRate = calcSuccessRate(passCount, tasksList.size());
-    exportBatchSummary(passCount, successRate, tasksList.size(), "./report");
+    exportBatchSummary(passCount, successRate, tasksList.size(), reportsPath);
+    std::cout<<"FINISH RUNNING BATCH!\n";
 }

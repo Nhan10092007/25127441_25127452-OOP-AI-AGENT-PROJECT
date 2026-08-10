@@ -18,7 +18,10 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 find_package(CURL REQUIRED)
 
 # Đóng gói các file lại để dễ quản lí và chạy
-set(CLIENT_SOURCE src/client/ollama_client.cpp)
+set(CLIENT_SOURCE 
+src/client/ollama_client.cpp
+src/client/embed_client.cpp
+)
 set(ENVIRONMENT_SOURCE
 src/env/native_environment.cpp
 src/env/sandbox_environment.cpp
@@ -29,11 +32,11 @@ src/agent/loop_detector.cpp
 src/agent/skill_loader.cpp
 )
 set(TOOL_SOURCE 
-src/tools/calculator_tool.cpp
-src/tools/exec_tool.cpp
-src/tools/file_tool.cpp
-src/tools/memory_tool.cpp
-src/tools/web_tool.cpp
+src/tools/calculator/calculator_tool.cpp
+src/tools/exec/exec_tool.cpp
+src/tools/file/file_tool.cpp
+src/tools/memory/memory_tool.cpp
+src/tools/web/web_tool.cpp
 src/tools/tool_registry.cpp
 )
 set(HARNESS_SOURCE

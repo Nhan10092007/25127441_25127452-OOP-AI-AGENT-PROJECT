@@ -31,8 +31,14 @@ std::string SandboxEnvironment::toLower(const std::string& str){ // Chuẩn hóa
 }
 
 // Static => cái này chỉ xài được trong sandbox_environment.cpp
-static const std::vector<std::string> blackList  = {"rm -rf", "sudo", "mkfs", "dd ", "shutdown", "reboot", "halt", "poweroff", "chmod 777",
-    "chown", "curl ", "wget ", ":(){ "};
+static const std::vector<std::string> blackList  = {
+    // For linux/macOS
+    "rm -rf", "sudo", "mkfs", "dd ", "shutdown", "reboot", "halt",
+    "poweroff", "chmod 777", "chown", "curl ", "wget ", ":(){ ",
+    // For windows
+    "format ", "del /f", "rd /s", "diskpart", "vssadmin delete shadows",
+    "reg delete", "takeown ", "icacls ", "bcdedit", "cipher /w"
+};
 
 bool SandboxEnvironment::isSafeCommand(const std::string& userCommand){
     if(userCommand == ""){
