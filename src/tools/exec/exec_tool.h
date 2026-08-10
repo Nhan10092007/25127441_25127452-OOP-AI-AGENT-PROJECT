@@ -1,5 +1,5 @@
 #pragma once
-#include "tool.h"
+#include "./tool.h"
 
 class ExecTool : public Tool {
 public:
