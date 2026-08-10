@@ -33,13 +33,15 @@ thread.start()
 import time
 time.sleep(5)
 ```
-- **Cell 3**: Kéo modle Gemm4 về từ Ollama
+- **Cell 3**: Kéo modle Gemm4:e4b và nomic-embed-text về từ Ollama
 ```bash
 !ollama pull gemma4:e4b
+!ollama pull nomic-embed-text
 ```
 - **Cell 4**: Thiết lập endpoint và điều chỉnh dữ liệu trả về từ response của Ollama bằng `fastAPI`
 ```python
 from fastapi import FastAPI
+from fastapi import Request
 import uvicorn
 from pydantic import BaseModel
 import httpx
@@ -56,7 +58,7 @@ ollama_url = "http://127.0.0.1:11434/api/chat"
 async def chat_endpoint(payload: DataInput):
   valid_data = payload.model_dump()
   try:
-    async with httpx.AsyncClient(timeout = 120.0) as client:
+    async with httpx.AsyncClient(timeout = 180.0) as client:
       response = await client.post(ollama_url, json=valid_data)
       response.raise_for_status()
       ollama_response = response.json()
@@ -69,7 +71,27 @@ async def chat_endpoint(payload: DataInput):
       }
       return filter_response
   except Exception as e:
-    return {"error" : str(e) }
+    return {"error": f"{type(e).__name__}: {str(e)}"}
+@app.post("/app/embed")
+async def embed(request: Request):
+    try:
+        data = await request.json()
+        text = data.get("text", "")
+        if not text:
+            return {"error": "Missing 'text' field", "success": False}
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            ollama_resp = await client.post(
+                "http://localhost:11434/api/embed",
+                json={"model": "nomic-embed-text", "input": text}
+            )
+            ollama_resp.raise_for_status()
+            result = ollama_resp.json()
+        embeddings = result.get("embeddings", [])
+        if not embeddings:
+            return {"error": "Ollama don't return embedding", "success": False}
+        return {"embedding": embeddings[0], "success": True}
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {str(e)}", "success": False}
 def run_uvicorn_sever():
   uvicorn.run(app, host = "0.0.0.0", port = 8000)
 thread = threading.Thread(target = run_uvicorn_sever, daemon = True)
@@ -148,6 +170,11 @@ Thầy hãy thay chữ `DÁN MÃ NGROK CÁ NHÂN CỦA THẦY VÀO ĐÂY` bằng
     "num_predict": 2048,
     "num_ctx": 8192
   },
+  "embedding": {
+    "base_URL": "DÁN ĐƯỜNG LINK NGROK CỦA THẦY VÀO ĐÂY/app/embed",
+    "model_name": "nomic-embed-text",
+    "similarity_threshold": 0.75
+  },
   "environment": {
     "mode": "sandbox",
     "workspace": "workspace/"
@@ -160,9 +187,10 @@ Thầy hãy thay chữ `DÁN MÃ NGROK CÁ NHÂN CỦA THẦY VÀO ĐÂY` bằng
   }
 }
 ```
-+ Các field thầy nên giữ nguyên: `model_name` (model mặc định theo gợi ý đồ án), `num_ctx`,  `num_predict`, `mode` (Ta nên ưu tiên test bằng chế độ sandbox thay vì native), `workspace` (thư mục cho các hoạt động của write_file và read_file tool trong sandbox mode).
-+ `base_URL`: Thầy sẽ dán đường link Ngrok mà nãy thầy đã copy trong Google Colab vào phần `DÁN ĐƯỜNG LINK NGROK CỦA THẦY VÀO ĐÂY` (Lưu ý: Thầy phải giữ nguyên endpoint `/app/chat`).
++ Các field thầy nên giữ nguyên: `model_name` của cả `llm` và `embedding` (model mặc định theo gợi ý đồ án), `num_ctx`,  `num_predict`, `mode` (Ta nên ưu tiên test bằng chế độ sandbox thay vì native), `workspace` (thư mục cho các hoạt động của write_file và read_file tool trong sandbox mode).
++ `base_URL`: Thầy sẽ dán đường link Ngrok mà nãy thầy đã copy trong Google Colab vào phần `DÁN ĐƯỜNG LINK NGROK CỦA THẦY VÀO ĐÂY` cho cả 2 fields `llm` và `embedding`(Lưu ý: Thầy phải giữ nguyên endpoint `/app/chat` và `/app/embed`).
 + `temperature`: Thầy nên giữ chỉ số này ở khoảng 0.0 - 0.3.
++ `similarity_threshold`: Thầy nên giữ chỉ số này ở khoảng 0.7 - 0.85.
 + `loop_threshold`: Đây là cấu hình cho `LoopDetector`. Trong đó, `pingpong_warning` và `repeat_warning` được dùng để kích hoạt cảnh báo sớm. Nếu số lần lặp chạm ngưỡng tối đa là `pingpong_critical` hoặc `repeat_critical`, tiến trình của task sẽ bị hủy ngay lập tức.
 
 
