@@ -1,8 +1,8 @@
-#include <string>
-#include <vector>
+#include "encodeBase64.h"
 #include <fstream>
+#include <vector>
 
-inline std::string encodeBase64(const std::string& filePath) {
+std::string encodeBase64(const std::string& filePath) {
     std::ifstream file(filePath, std::ios::binary);
     if (!file.is_open()) {
         return "";
@@ -19,7 +19,8 @@ inline std::string encodeBase64(const std::string& filePath) {
         "0123456789+/";
 
     std::string encoded;
-    int val = 0, valb = -6;
+    int val = 0;
+    int valb = -6;
     for (unsigned char c : buffer) {
         val = (val << 8) + c;
         valb += 8;
