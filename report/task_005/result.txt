@@ -1,4 +1,0 @@
-- Result: Fail.
-- Final answer: I was unable to find specific information regarding the French Capital City after multiple attempts using the web_search tool..
-- Steps takens: 4.
-- Evaluate: Agent stopped before reaching the step limit (finished or gave up early), but the answer was incorrect — the issue is likely with reasoning accuracy rather than running out of steps.
