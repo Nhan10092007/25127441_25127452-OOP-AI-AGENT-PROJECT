@@ -9,6 +9,9 @@
 #include"tools/web/web_tool.h"
 #include"tools/file/file_tool.h"
 #include"tools/memory/memory_tool.h"
+#include "tools/guiagent/screenshot/screenshot_tool.h"
+#include "tools/guiagent/mouse_click/mouse_click_tool.h"
+#include "tools/guiagent/keyboard_type/type_press_tool.h"
 #include<iostream>
 #include"trajectory.h"
 #include"keyword_evaluator.h"
@@ -121,6 +124,9 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
 
     toolRegistry = std::make_shared<ToolRegistry>();
     
+    toolRegistry->registerTool<ScreenshotTool>("capture_screenshot");
+    toolRegistry->registerTool<MouseClickTool>("click");
+    toolRegistry->registerTool<KeyboardTypeTool>("type_text");
     toolRegistry->registerTool<CalculatorTool>("calculator");
     toolRegistry->registerTool<ExecTool>("exec");
     toolRegistry->registerTool<ReadFileTool>("read_file");
