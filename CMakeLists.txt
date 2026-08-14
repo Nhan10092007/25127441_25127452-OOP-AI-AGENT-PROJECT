@@ -28,6 +28,7 @@ src/env/sandbox_environment.cpp
 )
 set(AGENT_SOURCE 
 src/agent/agent_loop.cpp
+src/agent/vision_agent_loop.cpp
 src/agent/loop_detector.cpp
 src/agent/skill_loader.cpp
 )
