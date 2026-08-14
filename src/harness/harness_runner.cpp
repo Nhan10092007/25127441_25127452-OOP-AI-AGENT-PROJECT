@@ -12,6 +12,7 @@
 #include "tools/guiagent/screenshot/screenshot_tool.h"
 #include "tools/guiagent/mouse_click/mouse_click_tool.h"
 #include "tools/guiagent/keyboard_type/type_press_tool.h"
+#include "agent/vision_agent_loop.h"
 #include<iostream>
 #include"trajectory.h"
 #include"keyword_evaluator.h"
