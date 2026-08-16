@@ -38,6 +38,10 @@ src/tools/exec/exec_tool.cpp
 src/tools/file/file_tool.cpp
 src/tools/memory/memory_tool.cpp
 src/tools/web/web_tool.cpp
+src/tools/listdir/list_dir_tool.cpp
+src/tools/datetime/datetime_tool.cpp
+src/tools/stringtool/string_tool.cpp
+src/tools/tool_policy.cpp
 src/tools/tool_registry.cpp
 src/tools/guiagent/screenshot/screenshot_tool.cpp
 src/tools/guiagent/screenshot/helper/screenshot_capture.cpp
