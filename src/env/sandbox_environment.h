@@ -3,6 +3,7 @@
 #include "environment.h"
 #include<filesystem>
 #include<memory>
+#include<optional>
 
 namespace fs = std::filesystem;
 
