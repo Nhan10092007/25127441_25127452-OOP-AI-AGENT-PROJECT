@@ -8,10 +8,14 @@
 #include"tools/exec/exec_tool.h"
 #include"tools/web/web_tool.h"
 #include"tools/file/file_tool.h"
-#include"tools/memory/memory_tool.h"
+#include "tools/memory/memory_tool.h"
 #include "tools/guiagent/screenshot/screenshot_tool.h"
 #include "tools/guiagent/mouse_click/mouse_click_tool.h"
 #include "tools/guiagent/keyboard_type/type_press_tool.h"
+#include "tools/listdir/list_dir_tool.h"
+#include "tools/datetime/datetime_tool.h"
+#include "tools/stringtool/string_tool.h"
+#include "tools/tool_policy.h"
 #include "agent/vision_agent_loop.h"
 #include<iostream>
 #include"trajectory.h"
@@ -139,6 +143,12 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
     toolRegistry->registerToolFactory("memory_search", [this]() -> std::unique_ptr<Tool> {
         return std::make_unique<MemorySearch>(embeddingClient.get(), config.embeddingConfig.similarity_threshold);
     });
+    toolRegistry->registerTool<ListDirTool>("list_dir");
+    toolRegistry->registerTool<DatetimeTool>("datetime");
+    toolRegistry->registerTool<StringTool>("string_tool");
+
+    // Apply Tool Policy
+    toolRegistry->setPolicy(ToolPolicy::allowAll());
 
 
     std::string mode = toLower(config.envConfig.mode);
