@@ -136,29 +136,11 @@
   },
   {
     "id": "task_016",
-    "description": "Simple: GUI screenshot capture",
-    "instruction": "Take a screenshot of the current desktop screen and confirm that the screenshot was captured successfully.",
+    "description": "Hard: GUI full interaction — screenshot, find target, click, type",
+    "instruction": "Open the TextEdit application using only GUI interactions (do not use the exec tool). Create a new document, click the text area, and type 'Hello from AI Agent'. Finally, take a screenshot of the filled document and save it to verify. Report whether all steps were successful.",
     "eval_type": "keyword",
     "eval_script_linux": "success",
     "eval_script_windows": "success",
-    "max_steps": 6
-  },
-  {
-    "id": "task_017",
-    "description": "Medium: GUI screenshot + click",
-    "instruction": "First, take a screenshot to observe the current desktop. Then click on the center of the screen at coordinates x=640, y=400. Confirm both actions were successful.",
-    "eval_type": "keyword",
-    "eval_script_linux": "success",
-    "eval_script_windows": "success",
-    "max_steps": 10
-  },
-  {
-    "id": "task_018",
-    "description": "Hard: GUI full interaction loop (screenshot + click + type)",
-    "instruction": "Take a screenshot to observe the current screen. Then click at coordinates x=640, y=400 to focus on that area. After clicking, type the text 'Hello from AI Agent'. Finally, take another screenshot to verify the result. Report whether all steps were successful.",
-    "eval_type": "keyword",
-    "eval_script_linux": "success",
-    "eval_script_windows": "success",
-    "max_steps": 14
+    "max_steps": 16
   }
 ]
