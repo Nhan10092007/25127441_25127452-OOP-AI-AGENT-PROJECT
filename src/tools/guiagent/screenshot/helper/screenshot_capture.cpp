@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
 
 #if defined(_WIN32) || defined(_WIN64)
     #define POPEN _popen
@@ -10,6 +11,17 @@
     #define POPEN popen
     #define PCLOSE pclose
 #endif
+
+static bool isSafePath(const std::string& path) {
+    if (path.empty()) return false;
+    for (char c : path) {
+        if (std::isalnum(static_cast<unsigned char>(c))) continue;
+        if (c == '.' || c == '_' || c == '-' || c == '/' || c == '\\') continue;
+        return false;
+    }
+    if (path.find("..") != std::string::npos) return false;
+    return true;
+}
 
 macOSScreenshotExecutor::macOSScreenshotExecutor()
     : IScreenshotExecutor("macOSScreenshotExecutor", "macOS Screenshot Executor") {}
@@ -21,8 +33,8 @@ LinuxScreenshotExecutor::LinuxScreenshotExecutor()
     : IScreenshotExecutor("LinuxScreenshotExecutor", "Linux Screenshot Executor") {}
 
 bool macOSScreenshotExecutor::capture(const std::string& outputPath) {
-    if (outputPath.empty()) {
-        throw std::invalid_argument("Output path cannot be empty");
+    if (!isSafePath(outputPath)) {
+        throw std::invalid_argument("Invalid or unsafe output path");
     }
     std::string command = "screencapture -x \"" + outputPath + "\"";
     FILE* pipe = POPEN(command.c_str(), "r");
@@ -34,8 +46,8 @@ bool macOSScreenshotExecutor::capture(const std::string& outputPath) {
 }
 
 bool WindowsScreenshotExecutor::capture(const std::string& outputPath) {
-    if (outputPath.empty()) {
-        throw std::invalid_argument("Output path cannot be empty");
+    if (!isSafePath(outputPath)) {
+        throw std::invalid_argument("Invalid or unsafe output path");
     }
     std::string command =
         "powershell -NoProfile -Command \""
@@ -55,8 +67,8 @@ bool WindowsScreenshotExecutor::capture(const std::string& outputPath) {
 }
 
 bool LinuxScreenshotExecutor::capture(const std::string& outputPath) {
-    if (outputPath.empty()) {
-        throw std::invalid_argument("Output path cannot be empty");
+    if (!isSafePath(outputPath)) {
+        throw std::invalid_argument("Invalid or unsafe output path");
     }
     std::string command =
         "gnome-screenshot -f \"" + outputPath + "\" 2>/dev/null || "

@@ -1,24 +1,43 @@
 #include "keyboard_executor.h"
 #include <cstdlib>
 #include <unordered_map>
+#include <algorithm>
+#include <stdexcept>
 
 #if defined(_WIN32) || defined(_WIN64)
     #include <windows.h>
 #endif
 
+static std::string sanitizeShellInput(const std::string& input) {
+    std::string sanitized;
+    sanitized.reserve(input.size());
+    for (char c : input) {
+        if (c == '\'' || c == '"' || c == '\\' || c == '`' ||
+            c == '$' || c == '!' || c == '&' || c == '|' ||
+            c == ';' || c == '\n' || c == '\r') {
+            continue;
+        }
+        sanitized.push_back(c);
+    }
+    return sanitized;
+}
+
 bool LinuxKeyboardExecutor::typeText(const std::string& text) {
-    std::string cmd = "xdotool type \"" + text + "\"";
+    std::string safe = sanitizeShellInput(text);
+    std::string cmd = "xdotool type \"" + safe + "\"";
     return (std::system(cmd.c_str()) == 0);
 }
 
 bool LinuxKeyboardExecutor::keyPress(const std::string& key) {
-    std::string cmd = "xdotool key " + key;
+    std::string safe = sanitizeShellInput(key);
+    std::string cmd = "xdotool key " + safe;
     return (std::system(cmd.c_str()) == 0);
 }
 
 bool MacKeyboardExecutor::typeText(const std::string& text) {
+    std::string safe = sanitizeShellInput(text);
     std::string cmd = "osascript -e 'tell application \"System Events\" to keystroke \""
-                      + text + "\"'";
+                      + safe + "\"'";
     return (std::system(cmd.c_str()) == 0);
 }
 
