@@ -1,5 +1,5 @@
 #pragma once
-#include "./tools/tool.h"
+#include "tools/tool.h"
 #include "helper/mouseFactory.h"
 
 class MouseClickTool : public Tool {
