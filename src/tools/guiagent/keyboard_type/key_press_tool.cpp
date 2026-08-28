@@ -1,15 +1,40 @@
 #include "key_press_tool.h"
 #include "nlohmann/json.hpp"
+#include <string>
 
 using json = nlohmann::json;
 
+namespace {
+
+#if defined(_WIN32) || defined(_WIN64)
+constexpr const char* KEY_PRESS_OS_HINT =
+    "Shortcuts are written with '+': win+r (Run dialog), win+s (Search), ctrl+n, ctrl+s, ctrl+c, "
+    "alt+tab, alt+f4, shift+tab. "
+    "Modifiers: ctrl, alt, shift, win (the Windows key; 'cmd' is accepted as an alias for it). "
+    "Use ctrl - NOT cmd - for the usual copy/paste/save shortcuts on Windows. "
+    "Mandatory JSON parameter: 'key' (string). Example: {\"key\": \"win+r\"}";
+#elif defined(__APPLE__)
+constexpr const char* KEY_PRESS_OS_HINT =
+    "Shortcuts are written with '+': cmd+space (Spotlight), cmd+n, cmd+s, cmd+q, cmd+c, shift+tab. "
+    "Modifiers: cmd (Command), ctrl, alt (Option), shift. "
+    "Use cmd - NOT ctrl - for the usual copy/paste/save shortcuts on macOS. "
+    "Mandatory JSON parameter: 'key' (string). Example: {\"key\": \"cmd+space\"}";
+#else
+constexpr const char* KEY_PRESS_OS_HINT =
+    "Shortcuts are written with '+': ctrl+n, ctrl+s, ctrl+c, alt+tab, alt+f4, shift+tab, super+a. "
+    "Modifiers: ctrl, alt, shift, super (the Super/Meta key; 'cmd' is accepted as an alias for it). "
+    "Use ctrl - NOT cmd - for the usual copy/paste/save shortcuts on Linux. "
+    "Mandatory JSON parameter: 'key' (string). Example: {\"key\": \"ctrl+s\"}";
+#endif
+
+} // namespace
+
 KeyPressTool::KeyPressTool()
     : Tool("key_press",
-           "Presses ONE functional key or ONE keyboard shortcut (NOT for typing text - use type_text for that). "
-           "Single keys: Enter, Tab, Space, Escape, Backspace, Delete, Up, Down, Left, Right, Home, End, F1-F12. "
-           "Shortcuts are written with '+': cmd+space (Spotlight on macOS), cmd+n, cmd+s, cmd+q, ctrl+c, shift+tab, alt+f4. "
-           "Modifiers: cmd (Command on macOS / Windows key / Super), ctrl, alt, shift. "
-           "Mandatory JSON parameter: 'key' (string). Example: {\"key\": \"cmd+space\"}")
+           std::string(
+               "Presses ONE functional key or ONE keyboard shortcut (NOT for typing text - use type_text for that). "
+               "Single keys: Enter, Tab, Space, Escape, Backspace, Delete, Up, Down, Left, Right, Home, End, F1-F12. ")
+               + KEY_PRESS_OS_HINT)
 {
     executor = KeyboardFactory::createExecutor();
 }
