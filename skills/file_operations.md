@@ -1,5 +1,5 @@
 ---
-keywords: file, write, read, save to, content, greeting, notes, txt, overwrite, append
+keywords: file, write, read, save to, content, greeting, notes, txt, overwrite, append, list, directory
 ---
 
 # SYSTEM PROMPT: FILE OPERATIONS SKILL
