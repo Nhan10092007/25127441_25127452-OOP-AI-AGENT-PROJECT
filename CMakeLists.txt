@@ -49,6 +49,7 @@ src/tools/guiagent/screenshot/helper/encodeBase64.cpp
 src/tools/guiagent/mouse_click/mouse_click_tool.cpp
 src/tools/guiagent/mouse_click/helper/mouse_executor.cpp
 src/tools/guiagent/keyboard_type/type_press_tool.cpp
+src/tools/guiagent/keyboard_type/key_press_tool.cpp
 src/tools/guiagent/keyboard_type/helper/keyboard_executor.cpp
 )
 set(HARNESS_SOURCE
