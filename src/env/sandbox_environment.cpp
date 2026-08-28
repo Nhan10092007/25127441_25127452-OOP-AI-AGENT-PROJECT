@@ -91,6 +91,32 @@ ToolResult SandboxEnvironment::step(const ToolInput& toolRequest){
             return ToolResult{"Error for read_file tool: " + std::string(e.what()), false};
         }
     }
+    else if(toolRequest.toolName == "capture_screenshot"){ // Ép ảnh chụp màn hình nằm trong workspace
+        try{
+            std::string userPath = "current_screen.png";
+            if(!toolRequest.args.empty() && json::accept(toolRequest.args)){
+                json toolArgs = json::parse(toolRequest.args);
+                if(toolArgs.contains("filename") && toolArgs["filename"].is_string()){
+                    userPath = toolArgs["filename"].get<std::string>();
+                }
+            }
+            std::optional<fs::path> temp = isSafePath(userPath);
+            if(temp == std::nullopt){
+                return ToolResult{"Invalid file path for capture_screenshot tool", false};
+            }
+            json newArgs;
+            newArgs["filename"] = temp.value().string();
+
+            ToolInput newRequest;
+            newRequest.toolName = toolRequest.toolName;
+            newRequest.args = newArgs.dump();
+
+            return wrapped->step(newRequest);
+        }
+        catch(const std::exception& e){
+            return ToolResult{"Error for capture_screenshot tool: " + std::string(e.what()), false};
+        }
+    }
     else if(toolRequest.toolName == "exec"){ // Kiểm tra command
         try{
             if(!isSafeCommand(toolRequest.args)){

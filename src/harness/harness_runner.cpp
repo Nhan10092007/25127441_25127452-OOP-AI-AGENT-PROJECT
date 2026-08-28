@@ -26,6 +26,26 @@
 
 using json = nlohmann::json;
 
+// Thay chuỗi base64 của ảnh bằng một placeholder ngắn gọn.
+// Dùng khi ghi trajectory / messages.json để file report không phình lên hàng chục MB.
+static std::string shortenImageData(const std::string& content){
+    const std::string key = "\"image_base64\":\"";
+    std::size_t start = content.find(key);
+    if(start == std::string::npos){
+        return content;
+    }
+    std::size_t valueStart = start + key.size();
+    std::size_t valueEnd = content.find('"', valueStart);
+    if(valueEnd == std::string::npos){
+        return content;
+    }
+    std::size_t length = valueEnd - valueStart;
+    return content.substr(0, valueStart)
+         + "<base64 image omitted, " + std::to_string(length) + " chars>"
+         + content.substr(valueEnd);
+}
+
+
 HarnessConfig HarnessRunner::readHarnessConfig(const fs::path& configPath) const{
     std::ifstream file(configPath);
     if(!file.is_open()){
@@ -132,7 +152,7 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
     toolRegistry = std::make_shared<ToolRegistry>();
     
     toolRegistry->registerTool<ScreenshotTool>("capture_screenshot");
-    toolRegistry->registerTool<ScreenshotTool>("key_press");
+    toolRegistry->registerTool<KeyPressTool>("key_press");
     toolRegistry->registerTool<MouseClickTool>("click");
     toolRegistry->registerTool<KeyboardTypeTool>("type_text");
     toolRegistry->registerTool<CalculatorTool>("calculator");
@@ -183,6 +203,9 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
 }
 
 double HarnessRunner::calcSuccessRate(int passCount, int numberOfTasks) const{
+    if(numberOfTasks <= 0){ // Tránh chia cho 0 khi tasks.json rỗng
+        return 0.0;
+    }
     return ((double)passCount / numberOfTasks) * 100;
 }
 
@@ -198,9 +221,10 @@ void HarnessRunner::exportTaskReport(const Task& task, const AgentResult& result
         for(const auto& [role, content, images] : result.messages){
             json temp;
             temp["role"] = role;
-            temp["content"] = content;
+            temp["content"] = shortenImageData(content);
             if(!images.empty()){
-                temp["images"] = images;
+                // Không ghi nguyên base64 vào report, chỉ ghi số lượng ảnh đã gửi kèm
+                temp["images"] = std::to_string(images.size()) + " image(s) sent to the model (base64 omitted)";
             }
             messages.push_back(temp);
         }
@@ -327,9 +351,24 @@ void HarnessRunner::runBatch(){
             std::vector<std::string> necessarySkills = skillLoader.selectSkills(task.instruction);
             std::string systemPrompt = toolRegistry->getToolsDescription() +  skillLoader.getSkills(necessarySkills);
             Trajectory trajectory(task.id, config.llmConfig.model_name);
-            AgentLoop loop(client.get(), env.get(), task.max_steps, threshold, [&trajectory](const StepRecord& record){
-                trajectory.addStep(record);
-            });
+
+            auto hook = [&trajectory](const StepRecord& record){
+                StepRecord compact = record;
+                // Ảnh base64 dài hàng trăm KB => cắt bớt trước khi ghi vào trajectory
+                if(compact.tool_result.has_value()){
+                    compact.tool_result = shortenImageData(compact.tool_result.value());
+                }
+                trajectory.addStep(compact);
+            };
+
+            // Task GUI cần VLM "nhìn" được ảnh => dùng VisionAgentLoop (đa hình qua con trỏ AgentLoop*)
+            std::unique_ptr<AgentLoop> loop;
+            if(task.requires_gui){
+                loop = std::make_unique<VisionAgentLoop>(client.get(), env.get(), task.max_steps, threshold, hook);
+            }
+            else{
+                loop = std::make_unique<AgentLoop>(client.get(), env.get(), task.max_steps, threshold, hook);
+            }
             Message system = {
                 .role = "system",
                 .content = systemPrompt
@@ -338,7 +377,7 @@ void HarnessRunner::runBatch(){
                 .role = "user",
                 .content = task.instruction
             };
-            AgentResult result = loop.run({system, prompt});
+            AgentResult result = loop->run({system, prompt});
 
             std::unique_ptr<Evaluator> evaluator;
             if(task.eval_type == "keyword"){

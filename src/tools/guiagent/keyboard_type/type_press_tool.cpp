@@ -5,8 +5,9 @@ using json = nlohmann::json;
 
 KeyboardTypeTool::KeyboardTypeTool()
     : Tool("type_text",
-           "Types a string of text at the current cursor focus. "
-           "Mandatory JSON parameter: 'text' (string).")
+           "Types a string of text into whatever UI element currently has keyboard focus "
+           "(click on the target field first, or open it with key_press). "
+           "Mandatory JSON parameter: 'text' (string). Example: {\"text\": \"Hello\"}")
 {
     executor = KeyboardFactory::createExecutor();
 }

@@ -32,6 +32,20 @@ src/agent/vision_agent_loop.cpp
 src/agent/loop_detector.cpp
 src/agent/skill_loader.cpp
 )
+# Nhóm tool của GUI Agent (tách riêng để target gui_check dùng lại)
+set(GUI_TOOL_SOURCE
+src/tools/guiagent/screenshot/screenshot_tool.cpp
+src/tools/guiagent/screenshot/helper/screenshot_capture.cpp
+src/tools/guiagent/screenshot/helper/encodeBase64.cpp
+src/tools/guiagent/screenshot/helper/image_info.cpp
+src/tools/guiagent/mouse_click/mouse_click_tool.cpp
+src/tools/guiagent/mouse_click/helper/mouse_executor.cpp
+src/tools/guiagent/keyboard_type/type_press_tool.cpp
+src/tools/guiagent/keyboard_type/key_press_tool.cpp
+src/tools/guiagent/keyboard_type/helper/keyboard_executor.cpp
+src/tools/guiagent/common/gui_utils.cpp
+)
+
 set(TOOL_SOURCE 
 src/tools/calculator/calculator_tool.cpp
 src/tools/exec/exec_tool.cpp
@@ -43,14 +57,7 @@ src/tools/datetime/datetime_tool.cpp
 src/tools/stringtool/string_tool.cpp
 src/tools/tool_policy.cpp
 src/tools/tool_registry.cpp
-src/tools/guiagent/screenshot/screenshot_tool.cpp
-src/tools/guiagent/screenshot/helper/screenshot_capture.cpp
-src/tools/guiagent/screenshot/helper/encodeBase64.cpp
-src/tools/guiagent/mouse_click/mouse_click_tool.cpp
-src/tools/guiagent/mouse_click/helper/mouse_executor.cpp
-src/tools/guiagent/keyboard_type/type_press_tool.cpp
-src/tools/guiagent/keyboard_type/key_press_tool.cpp
-src/tools/guiagent/keyboard_type/helper/keyboard_executor.cpp
+${GUI_TOOL_SOURCE}
 )
 set(HARNESS_SOURCE
 src/harness/functional_evaluator.cpp
@@ -64,3 +71,9 @@ add_executable(agent_runner benchmark/run_eval.cpp src/sqlite3.c ${AGENT_SOURCE}
 
 # Lắp thư viện libcurl vào file để chạy
 target_link_libraries(agent_runner PRIVATE CURL::libcurl)
+
+# Target phụ: kiểm tra nhanh các tool GUI mà không cần LLM (xem tests/test_gui_tools.cpp)
+add_executable(gui_check tests/test_gui_tools.cpp ${GUI_TOOL_SOURCE})
+
+# Target phụ: test VisionAgentLoop bằng LLM/Environment giả (xem tests/test_vision_agent_loop.cpp)
+add_executable(vision_loop_test tests/test_vision_agent_loop.cpp src/agent/agent_loop.cpp src/agent/vision_agent_loop.cpp src/agent/loop_detector.cpp)

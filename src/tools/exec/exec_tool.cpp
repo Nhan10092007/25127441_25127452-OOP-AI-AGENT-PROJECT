@@ -8,6 +8,7 @@
 #include<unistd.h>
 #include<sys/wait.h>
 #include<signal.h>
+#include<fcntl.h>
 #endif
 #include<chrono>
 #include<thread>
@@ -114,7 +115,9 @@ std::string ExecTool::execute(const std::string& args) {
 
     #else
         int pipefd[2];
-        pipe(pipefd); // pipefd[0] = đầu đọc, pipefd[1] = đầu ghi
+        if(pipe(pipefd) == -1){ // pipefd[0] = đầu đọc, pipefd[1] = đầu ghi
+            throw std::runtime_error("Failed to create pipe!");
+        }
 
         pid_t pid = fork();
 
@@ -135,16 +138,38 @@ std::string ExecTool::execute(const std::string& args) {
         // Đóng tiến trình cha
         close(pipefd[1]);
 
+        // Pipe của HĐH chỉ chứa được khoảng 64KB. Nếu cha đợi con chết xong mới đọc,
+        // lệnh nào in ra nhiều hơn 64KB sẽ làm con bị chặn khi ghi => deadlock, và cha
+        // báo nhầm là "timed out". Vì vậy phải vừa đợi vừa đọc, với đầu đọc non-blocking.
+        int flags = fcntl(pipefd[0], F_GETFL, 0);
+        fcntl(pipefd[0], F_SETFL, flags | O_NONBLOCK);
+
         auto start = std::chrono::steady_clock::now();
         const int TIMEOUT_SEC = 10;
-        int status;
+        int status = 0;
         pid_t result_pid;
 
         bool isTimeOut = false;
+        bool childExited = false;
+        std::array<char, 4096> buffer;
+
+        auto drainPipe = [&]() {
+            ssize_t bytesRead;
+            while ((bytesRead = read(pipefd[0], buffer.data(), buffer.size() - 1)) > 0) {
+                buffer[bytesRead] = '\0';
+                result += buffer.data();
+            }
+        };
 
         while (true) {
+            drainPipe(); // Đọc trước để tiến trình con không bị nghẽn khi ghi
+
             result_pid = waitpid(pid, &status, WNOHANG); // Không chặn, chỉ hỏi "xong chưa"
-            if (result_pid == pid) break; // Tiến trình con đã kết thúc
+            if (result_pid == pid) {
+                childExited = true;
+                drainPipe(); // Vét nốt phần còn lại trong pipe
+                break;
+            }
 
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start).count();
             if (elapsed >= TIMEOUT_SEC) {
@@ -154,17 +179,10 @@ std::string ExecTool::execute(const std::string& args) {
                 isTimeOut = true;
                 break;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Nghỉ ngắn rồi hỏi lại
+            std::this_thread::sleep_for(std::chrono::milliseconds(50)); // Nghỉ ngắn rồi hỏi lại
         }
 
-        if(!isTimeOut){
-            std::array<char, 4096> buffer;
-            ssize_t bytesRead;
-            while ((bytesRead = read(pipefd[0], buffer.data(), buffer.size() - 1)) > 0) {
-                buffer[bytesRead] = '\0';
-                result += buffer.data();
-            }
-
+        if(!isTimeOut && childExited){
             // Lấy exit code
             if(WIFEXITED(status)){
                 int exitCode = WEXITSTATUS(status);
@@ -179,6 +197,18 @@ std::string ExecTool::execute(const std::string& args) {
 
     if(result.empty()){
         return "Executed successfully, but no output.";
+    }
+
+    // Cắt bớt output quá dài: num_ctx của model chỉ vài nghìn token, một lệnh in ra hàng MB
+    // sẽ làm tràn context và phá hỏng toàn bộ hội thoại của agent.
+    const std::size_t MAX_OUTPUT = 8000;
+    if(result.size() > MAX_OUTPUT){
+        std::string head = result.substr(0, 5000);
+        std::string tail = result.substr(result.size() - 2000);
+        result = head
+               + "\n\n[... " + std::to_string(result.size() - 7000)
+               + " characters omitted because the output was too long ...]\n\n"
+               + tail;
     }
 
     return result;

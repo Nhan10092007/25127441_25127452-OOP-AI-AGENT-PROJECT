@@ -25,6 +25,9 @@ std::vector<float> EmbeddingClient::embed(const std::string& text){
     json_payload["text"] = text;
  
     CURL* curl = curl_easy_init();
+    if(!curl){
+        throw std::runtime_error("Libcurl Error: can't initialize CURL handle");
+    }
     curl_slist* header = nullptr;
     header = curl_slist_append(header, "ngrok-skip-browser-warning: true");
     header = curl_slist_append(header, "Content-Type: application/json");
@@ -40,6 +43,8 @@ std::vector<float> EmbeddingClient::embed(const std::string& text){
  
     std::string responseData;
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L); // Tránh treo vô hạn khi tunnel ngrok chết
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 60L);
  
     CURLcode result = curl_easy_perform(curl);
     curl_slist_free_all(header);

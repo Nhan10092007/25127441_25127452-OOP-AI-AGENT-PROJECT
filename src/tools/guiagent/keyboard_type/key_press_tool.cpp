@@ -5,9 +5,11 @@ using json = nlohmann::json;
 
 KeyPressTool::KeyPressTool()
     : Tool("key_press",
-           "Presses a single functional key (NOT for typing text - use type_text for that). "
-           "Common keys: Enter, Tab, Escape, Backspace, Up, Down, Left, Right, Space. "
-           "Mandatory JSON parameter: 'key' (string).")
+           "Presses ONE functional key or ONE keyboard shortcut (NOT for typing text - use type_text for that). "
+           "Single keys: Enter, Tab, Space, Escape, Backspace, Delete, Up, Down, Left, Right, Home, End, F1-F12. "
+           "Shortcuts are written with '+': cmd+space (Spotlight on macOS), cmd+n, cmd+s, cmd+q, ctrl+c, shift+tab, alt+f4. "
+           "Modifiers: cmd (Command on macOS / Windows key / Super), ctrl, alt, shift. "
+           "Mandatory JSON parameter: 'key' (string). Example: {\"key\": \"cmd+space\"}")
 {
     executor = KeyboardFactory::createExecutor();
 }

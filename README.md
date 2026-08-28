@@ -339,6 +339,54 @@ export CXX=$(brew --prefix llvm)/bin/clang++
     cmake --build build && ./build/agent_runner
     ```
 
+# C. Hướng dẫn chạy GUI Agent (task có `"requires_gui": true`):
+
+GUI Agent chụp màn hình, gửi ảnh cho VLM rồi điều khiển chuột/bàn phím thật. Vì vậy nó cần thêm vài bước cấu hình so với các task thường.
+
+## 1. Model phải là model có thị giác (VLM):
+Trong `config/config.json`, `llm.model_name` phải là một model đọc được ảnh (ví dụ `gemma3:4b`, `qwen2.5vl:7b`). Nếu dùng model chỉ có text, agent sẽ không nhìn thấy screenshot và luôn click sai.
+
+## 2. Cài công cụ điều khiển chuột/bàn phím:
+
+### macOS (Homebrew):
+```bash
+brew install cliclick
+```
+- `screencapture`, `sips` và `osascript` đã có sẵn trong macOS, không cần cài thêm.
+- `cliclick` là bắt buộc cho tool `click`. Nếu thiếu, tool sẽ báo lỗi rõ ràng kèm hướng dẫn cài.
+
+### Linux (X11):
+```bash
+sudo apt install xdotool gnome-screenshot
+```
+
+### Windows:
+Không cần cài gì thêm (dùng PowerShell và Win32 API).
+
+## 3. Cấp quyền cho Terminal trên macOS (quan trọng nhất):
+Vào **System Settings > Privacy & Security** và bật cho ứng dụng terminal đang chạy agent (Terminal.app / iTerm2 / VS Code):
+- **Screen Recording** → để `capture_screenshot` chụp được màn hình thật (nếu không, ảnh sẽ chụp lỗi hoặc chỉ có hình nền).
+- **Accessibility** → để `click`, `type_text`, `key_press` gửi được sự kiện chuột/bàn phím.
+
+Sau khi bật quyền, **phải tắt và mở lại terminal** thì quyền mới có hiệu lực.
+
+## 4. Kiểm tra nhanh môi trường GUI trước khi chạy agent:
+Dự án có sẵn một chương trình phụ `gui_check` để thử từng tool GUI mà không cần LLM:
+```bash
+cmake --build build --target gui_check
+./build/gui_check                # chỉ chụp màn hình
+./build/gui_check --interactive  # chụp màn hình + click + gõ chữ (điều khiển chuột/bàn phím thật)
+```
+Nếu `gui_check` báo `SCREENSHOT FAILED` hoặc `Missing dependency 'cliclick'`, hãy xử lý xong bước 2 và 3 rồi mới chạy `agent_runner`.
+
+## 5. Ghi chú về toạ độ trên màn hình Retina:
+`screencapture` xuất ảnh theo pixel vật lý (màn Retina là 2x), trong khi `cliclick` click theo toạ độ logic (point). Do đó `macOSScreenshotExecutor` sẽ tự resize ảnh về đúng kích thước logic bằng `sips` trước khi gửi cho VLM, nhờ vậy toạ độ (x, y) mà model đọc từ ảnh dùng thẳng được cho tool `click`.
+
+## 6. Kiểm tra logic vòng lặp Vision (không cần màn hình, không cần Ollama):
+```bash
+cmake --build build --target vision_loop_test && ./build/vision_loop_test
+```
+
 # Xem kết quả sau khi chạy chương trình:
 
 Sau khi chạy xong, nếu thầy thấy kết quả trên terminal hiện như sau:
