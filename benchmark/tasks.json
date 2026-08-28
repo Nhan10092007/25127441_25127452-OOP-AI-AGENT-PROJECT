@@ -122,7 +122,7 @@
     "instruction": "Convert the text 'hello world from the ai agent' to uppercase using the string_tool, then write the uppercase result to a file named shout.txt.",
     "eval_type": "functional",
     "eval_script_linux": "test -f workspace/shout.txt && grep -q 'HELLO WORLD FROM THE AI AGENT' workspace/shout.txt",
-    "eval_script_windows": "if exist workspace\\\\shout.txt (findstr /C:\"HELLO WORLD FROM THE AI AGENT\" workspace\\\\shout.txt) else (exit /b 1)",
+    "eval_script_windows": "if exist workspace\\shout.txt (findstr /C:\"HELLO WORLD FROM THE AI AGENT\" workspace\\shout.txt) else (exit /b 1)",
     "max_steps": 10
   },
   {
@@ -131,7 +131,7 @@
     "instruction": "Get the current date and time using the datetime tool, write it into a file named timestamp.txt, then use list_dir to confirm the file exists in the workspace directory. Tell me the timestamp you saved.",
     "eval_type": "functional",
     "eval_script_linux": "test -f workspace/timestamp.txt && test -s workspace/timestamp.txt",
-    "eval_script_windows": "if exist workspace\\\\timestamp.txt (findstr /R \".\" workspace\\\\timestamp.txt >nul) else (exit /b 1)",
+    "eval_script_windows": "if exist workspace\\timestamp.txt (findstr /R \".\" workspace\\timestamp.txt >nul) else (exit /b 1)",
     "max_steps": 10
   },
   {
@@ -141,6 +141,7 @@
     "eval_type": "keyword",
     "eval_script_linux": "success",
     "eval_script_windows": "success",
-    "max_steps": 16
+    "max_steps": 16,
+    "requires_gui": true
   }
 ]
