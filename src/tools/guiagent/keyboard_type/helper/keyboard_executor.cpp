@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cctype>
 #include <stdexcept>
+#include <thread>
+#include <chrono>
 
 #if defined(_WIN32) || defined(_WIN64)
     #include <windows.h>
@@ -111,6 +113,25 @@ bool runAndWait(const std::string& command) {
     gui_utils::waitForUi();
     return true;
 }
+
+#if defined(_WIN32) || defined(_WIN64)
+// KEYEVENTF_UNICODE nhận UTF-16 code unit, trong khi std::string của dự án là UTF-8.
+// Chuyển đổi trước khi gõ để ký tự ngoài ASCII (tiếng Việt, emoji) không bị hỏng.
+std::wstring utf8ToWide(const std::string& text) {
+    if (text.empty()) {
+        return std::wstring();
+    }
+    int needed = MultiByteToWideChar(CP_UTF8, 0, text.c_str(),
+                                     static_cast<int>(text.size()), nullptr, 0);
+    if (needed <= 0) {
+        return std::wstring();
+    }
+    std::wstring wide(static_cast<std::size_t>(needed), L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, text.c_str(), static_cast<int>(text.size()),
+                        wide.data(), needed);
+    return wide;
+}
+#endif
 
 } // namespace
 
@@ -234,16 +255,38 @@ bool MacKeyboardExecutor::keyPress(const std::string& key) {
 
 bool WindowsKeyboardExecutor::typeText(const std::string& text) {
 #if defined(_WIN32) || defined(_WIN64)
-    for (char c : text) {
-        INPUT input = {0};
-        input.type = INPUT_KEYBOARD;
-        input.ki.wScan = c;
-        input.ki.wVk = 0;
-        input.ki.dwFlags = KEYEVENTF_UNICODE;
-        SendInput(1, &input, sizeof(INPUT));
-        input.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
-        SendInput(1, &input, sizeof(INPUT));
+    if (text.empty()) {
+        return false;
     }
+
+    const std::wstring wide = utf8ToWide(text);
+    if (wide.empty()) {
+        return false;
+    }
+
+    for (wchar_t code : wide) {
+        // Gửi down + up trong MỘT lời gọi SendInput để hai sự kiện không bị xen kẽ
+        // bởi input khác, tránh trường hợp ứng dụng nhận thiếu keyup rồi lặp ký tự.
+        INPUT events[2] = {};
+        events[0].type = INPUT_KEYBOARD;
+        events[0].ki.wVk = 0;
+        events[0].ki.wScan = static_cast<WORD>(code);
+        events[0].ki.dwFlags = KEYEVENTF_UNICODE;
+        events[0].ki.dwExtraInfo = GetMessageExtraInfo();
+
+        events[1] = events[0];
+        events[1].ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
+
+        if (SendInput(2, events, sizeof(INPUT)) != 2) {
+            return false;
+        }
+
+        // Nhịp nghỉ giữa các ký tự: Notepad/RichEdit trên Windows 11 xử lý input theo
+        // message loop, gõ liền không nghỉ sẽ rớt ký tự hoặc lặp ký tự cuối.
+        std::this_thread::sleep_for(std::chrono::milliseconds(12));
+    }
+
+    gui_utils::waitForUi();
     return true;
 #else
     (void)text;
@@ -298,6 +341,9 @@ bool WindowsKeyboardExecutor::keyPress(const std::string& key) {
     for (auto rit = modifiers.rbegin(); rit != modifiers.rend(); ++rit) {
         sendKey(modifierVkMap.at(*rit), true);
     }
+
+    // Chờ UI phản hồi (mở Run dialog, mở Start menu, ...) trước khi agent hành động tiếp.
+    gui_utils::waitForUi();
     return true;
 #else
     (void)key;
