@@ -16,14 +16,30 @@
     #define PCLOSE pclose
 #endif
 
+// Đường dẫn được nhét thẳng vào command shell (screencapture / powershell / scrot),
+// nên ta chặn các ký tự có thể dùng để chèn lệnh (command injection) thay vì chỉ
+// cho phép một tập ký tự hẹp. Whitelist cũ loại luôn ổ đĩa Windows ("C:\\...")
+// và mọi ký tự Unicode trong tên user => screenshot luôn fail trên Windows.
 static bool isSafePath(const std::string& path) {
     if (path.empty()) return false;
+
+    static const std::string dangerous = "\"'`$&|;<>^*?\n\r\t";
     for (char c : path) {
-        if (std::isalnum(static_cast<unsigned char>(c))) continue;
-        if (c == '.' || c == '_' || c == '-' || c == '/' || c == '\\' || c == ' ') continue;
-        return false;
+        unsigned char uc = static_cast<unsigned char>(c);
+        if (uc < 0x20) return false;                                  // ký tự điều khiển
+        if (dangerous.find(c) != std::string::npos) return false;     // ký tự shell
     }
-    if (path.find("..") != std::string::npos) return false;
+    if (path.find("%") != std::string::npos) return false;            // %VAR% trên cmd/powershell
+    if (path.find("..") != std::string::npos) return false;           // path traversal
+
+    // ':' chỉ hợp lệ ở vị trí ổ đĩa Windows, ví dụ "C:\\Users\\..."
+    std::size_t colon = path.find(':');
+    if (colon != std::string::npos) {
+        bool isDriveLetter = (colon == 1 &&
+                              std::isalpha(static_cast<unsigned char>(path[0])) &&
+                              path.find(':', colon + 1) == std::string::npos);
+        if (!isDriveLetter) return false;
+    }
     return true;
 }
 
@@ -133,6 +149,14 @@ bool WindowsScreenshotExecutor::capture(const std::string& outputPath) {
     if (!isSafePath(outputPath)) {
         throw std::invalid_argument("Invalid or unsafe output path");
     }
+
+    std::error_code errorCode;
+    std::filesystem::path target(outputPath);
+    if (target.has_parent_path()) {
+        std::filesystem::create_directories(target.parent_path(), errorCode);
+    }
+    std::filesystem::remove(target, errorCode);
+
     std::string command =
         "powershell -NoProfile -Command \""
         "Add-Type -AssemblyName System.Drawing, System.Windows.Forms; "
@@ -145,8 +169,7 @@ bool WindowsScreenshotExecutor::capture(const std::string& outputPath) {
     if (!runCommand(command)) {
         return false;
     }
-    std::error_code errorCode;
-    return std::filesystem::exists(outputPath, errorCode);
+    return std::filesystem::exists(target, errorCode);
 }
 
 bool LinuxScreenshotExecutor::capture(const std::string& outputPath) {
