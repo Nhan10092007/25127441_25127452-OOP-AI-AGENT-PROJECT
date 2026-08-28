@@ -30,12 +30,15 @@ struct Task{
     std::string eval_script_windows;
     std::string eval_script_linux;
     int max_steps;
+    bool requires_gui = false;
 };
 
 class HarnessRunner{
 private:
     HarnessConfig config;
     std::shared_ptr<ToolRegistry> toolRegistry;
+    ToolPolicy mainPolicy;
+    ToolPolicy guiPolicy;   
     SkillLoader skillLoader;
     std::unique_ptr<LLMClient> client;
     std::unique_ptr<Environment> env;

@@ -12,6 +12,7 @@
 #include "tools/guiagent/screenshot/screenshot_tool.h"
 #include "tools/guiagent/mouse_click/mouse_click_tool.h"
 #include "tools/guiagent/keyboard_type/type_press_tool.h"
+#include "tools/guiagent/keyboard_type/key_press_tool.h"
 #include "tools/listdir/list_dir_tool.h"
 #include "tools/datetime/datetime_tool.h"
 #include "tools/stringtool/string_tool.h"
@@ -87,6 +88,7 @@ std::vector<Task> HarnessRunner::readTasks(const fs::path& tasksPath) const{
         temp.eval_script_windows = task.value("eval_script_windows", "");
         temp.eval_script_linux = task.value("eval_script_linux", "");
         temp.max_steps = task["max_steps"];
+        temp.requires_gui = task.value("requires_gui", false);
         res.push_back(temp);
     }
     return res;
@@ -130,6 +132,7 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
     toolRegistry = std::make_shared<ToolRegistry>();
     
     toolRegistry->registerTool<ScreenshotTool>("capture_screenshot");
+    toolRegistry->registerTool<ScreenshotTool>("key_press");
     toolRegistry->registerTool<MouseClickTool>("click");
     toolRegistry->registerTool<KeyboardTypeTool>("type_text");
     toolRegistry->registerTool<CalculatorTool>("calculator");
@@ -147,9 +150,13 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
     toolRegistry->registerTool<DatetimeTool>("datetime");
     toolRegistry->registerTool<StringTool>("string_tool");
 
-    // Apply Tool Policy
-    toolRegistry->setPolicy(ToolPolicy::allowAll());
-
+    mainPolicy = ToolPolicy::allowOnly({
+        "calculator", "exec", "read_file", "write_file", "web_search",
+        "memory_save", "memory_search", "list_dir", "datetime", "string_tool"
+    });
+    guiPolicy = ToolPolicy::allowOnly({
+        "capture_screenshot", "click", "type_text", "key_press"
+    });
 
     std::string mode = toLower(config.envConfig.mode);
     if(mode == "sandbox"){
@@ -315,6 +322,8 @@ void HarnessRunner::runBatch(){
     std::cout<<"START RUN BATCH...\n";
     for(const auto& task : tasksList){
         try{
+            toolRegistry->setPolicy(task.requires_gui ? guiPolicy : mainPolicy);
+            
             std::vector<std::string> necessarySkills = skillLoader.selectSkills(task.instruction);
             std::string systemPrompt = toolRegistry->getToolsDescription() +  skillLoader.getSkills(necessarySkills);
             Trajectory trajectory(task.id, config.llmConfig.model_name);
