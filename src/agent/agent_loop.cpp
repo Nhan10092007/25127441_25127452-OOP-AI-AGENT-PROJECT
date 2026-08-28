@@ -68,29 +68,36 @@ std::optional<Action> AgentLoop::parseAction(const std::string& rawText) {
     const json& actionObj = data["action"];
     std::string type = actionObj.value("type", "");
 
-    if (type == "tool_call") {
-        if (!actionObj.contains("tool") || !actionObj.contains("args")) {
-            return std::nullopt; // thiếu field bắt buộc
-        }
-        std::string toolName = actionObj["tool"].get<std::string>();
-        std::string args;
+    if (type == "finish") {
+        std::string result = actionObj.value("result", "");
+        return Action{FinishAction{result}};
+    }
+    if (type == "error") {
+        std::string message = actionObj.value("message", "");
+        return Action{ErrorAction{message}};
+    }
+
+    // Tool call. Một số model trả về {"type": "<tên tool>", "args": ...} thay vì
+    // {"type": "tool_call", "tool": "<tên tool>", ...}, nên chấp nhận cả hai dạng.
+    std::string toolName;
+    if (actionObj.contains("tool") && actionObj["tool"].is_string()) {
+        toolName = actionObj["tool"].get<std::string>();
+    } else if (type != "tool_call") {
+        toolName = type;
+    }
+    if (toolName.empty()) {
+        return std::nullopt;
+    }
+
+    std::string args = "{}";
+    if (actionObj.contains("args")) {
         if (actionObj["args"].is_string()) {
             args = actionObj["args"].get<std::string>();
         } else {
             args = actionObj["args"].dump();
         }
-        return Action{ToolCallAction{toolName, args}};
     }
-    else if (type == "finish") {
-        std::string result = actionObj.value("result", "");
-        return Action{FinishAction{result}};
-    }
-    else if (type == "error") {
-        std::string message = actionObj.value("message", "");
-        return Action{ErrorAction{message}};
-    }
-
-    return std::nullopt; 
+    return Action{ToolCallAction{toolName, args}};
 }
 
 AgentResult AgentLoop::run(std::vector<Message> initialMessages) {

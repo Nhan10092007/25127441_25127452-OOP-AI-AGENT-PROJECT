@@ -143,5 +143,55 @@
     "eval_script_windows": "success",
     "max_steps": 16,
     "requires_gui": true
+  },
+  {
+    "id": "task_017",
+    "description": "Windows GUI: open Notepad via Start menu and type text",
+    "instruction": "On Windows, open the Notepad application using only GUI interactions (do not use the exec tool): press the Windows key, type 'notepad', then press Enter. Wait for the window, take a screenshot to confirm Notepad is open, click inside the text area and type 'Hello from AI Agent'. Take a final screenshot saved as 'notepad_check.png' to verify, then report whether all steps were successful.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f notepad_check.png",
+    "eval_script_windows": "if exist notepad_check.png (exit /b 0) else (exit /b 1)",
+    "max_steps": 18,
+    "requires_gui": true
+  },
+  {
+    "id": "task_018",
+    "description": "Windows GUI: open a browser and go to google.com",
+    "instruction": "On Windows, open the Google Chrome browser using only GUI interactions (do not use the exec tool): press the Windows key, type 'chrome', then press Enter. Wait for the browser window, take a screenshot to see it, then click the address bar (or press ctrl+l), type 'https://www.google.com' and press Enter. Wait for the page to load, take a final screenshot saved as 'google_check.png', and report whether the Google homepage is visible and all steps were successful.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f google_check.png",
+    "eval_script_windows": "if exist google_check.png (exit /b 0) else (exit /b 1)",
+    "max_steps": 20,
+    "requires_gui": true
+  },
+  {
+    "id": "task_019",
+    "description": "Windows GUI: search a keyword on Google",
+    "instruction": "On Windows, open Google Chrome with GUI interactions only, navigate to https://www.google.com, click the search box in the middle of the page, type 'C++ programming language' and press Enter. Wait for the results page, take a screenshot saved as 'google_search_check.png', and tell me the title of the first search result you can read on the screen. Report whether all steps were successful.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f google_search_check.png",
+    "eval_script_windows": "if exist google_search_check.png (exit /b 0) else (exit /b 1)",
+    "max_steps": 22,
+    "requires_gui": true
+  },
+  {
+    "id": "task_020",
+    "description": "Windows GUI: open facebook.com in a new browser tab",
+    "instruction": "On Windows, using only GUI interactions, open Google Chrome, open a new tab with ctrl+t, type 'https://www.facebook.com' in the address bar and press Enter. Wait for the page to load, take a screenshot saved as 'facebook_check.png', and describe what you see on the Facebook page (for example the login form). Report whether all steps were successful.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f facebook_check.png",
+    "eval_script_windows": "if exist facebook_check.png (exit /b 0) else (exit /b 1)",
+    "max_steps": 20,
+    "requires_gui": true
+  },
+  {
+    "id": "task_021",
+    "description": "Hard Windows GUI: browse Facebook then save a note in Notepad",
+    "instruction": "On Windows, using only GUI interactions (no exec tool): first open Google Chrome and navigate to https://www.facebook.com, take a screenshot to observe the page. Then open Notepad through the Start menu, click its text area and type 'Visited facebook.com'. Finally take a screenshot saved as 'facebook_note_check.png' showing the Notepad window and report whether all steps were successful.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f facebook_note_check.png",
+    "eval_script_windows": "if exist facebook_note_check.png (exit /b 0) else (exit /b 1)",
+    "max_steps": 26,
+    "requires_gui": true
   }
 ]
