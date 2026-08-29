@@ -3,8 +3,6 @@
 #include <variant>
 #include "nlohmann/json.hpp"
 
-using json = nlohmann::json;
-
 
 struct ToolCallAction {
     std::string toolName;   
@@ -20,7 +18,8 @@ struct ErrorAction {
 };
 
 using Action = std::variant<ToolCallAction, FinishAction, ErrorAction>;
-inline json actionToJson(const Action& action) {
+inline nlohmann::json actionToJson(const Action& action) {
+    using json = nlohmann::json;
     return std::visit([](const auto& a) -> json {
         using T = std::decay_t<decltype(a)>;
         if constexpr (std::is_same_v<T, ToolCallAction>) {

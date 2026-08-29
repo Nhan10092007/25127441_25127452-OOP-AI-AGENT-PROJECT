@@ -10,7 +10,7 @@ class Trajectory{
 private:
     std::string task_id;
     std::string model;
-    bool success;
+    bool success = false;
     std::vector<StepRecord> steps;
 
     // Helper functions:

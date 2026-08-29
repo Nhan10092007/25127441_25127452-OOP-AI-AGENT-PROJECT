@@ -1,3 +1,4 @@
+
 sequenceDiagram
     autonumber
     participant Caller as Caller
@@ -6,6 +7,7 @@ sequenceDiagram
     participant LLM as LLMClient
     participant ENV as Environment
     participant TR as ToolRegistry
+    participant TP as ToolPolicy
     participant T as Tool
 
     Caller ->>+ AL: run(initialMessages)
@@ -32,6 +34,8 @@ sequenceDiagram
             else OK / WARNING
                 AL ->>+ ENV: step(ToolInput)
                 ENV ->>+ TR: createTool(toolName)
+                TR ->>+ TP: isAllowed(toolName)
+                TP -->>- TR: bool
                 TR -->>- ENV: unique_ptr~Tool~
                 ENV ->>+ T: execute(args)
                 T -->>- ENV: result
@@ -41,4 +45,4 @@ sequenceDiagram
     end
 
     AL -->>- Caller: AgentResult(fail, "Max steps reached")
-
+```

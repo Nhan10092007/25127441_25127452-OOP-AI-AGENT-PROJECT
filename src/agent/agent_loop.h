@@ -29,7 +29,8 @@ protected:
     bool hasNewObservation = false; 
 public:
     AgentLoop(LLMClient* client, Environment* env, int max_steps, const LoopThreshold& threshold, std::function<void(const StepRecord&)> hook);
-    AgentResult run(std::vector<Message> initialMessages);
+    virtual ~AgentLoop() = default;   // Cần virtual vì lớp con (VisionAgentLoop) được xoá qua con trỏ AgentLoop*
+    virtual AgentResult run(std::vector<Message> initialMessages);
 
 protected:
     virtual void observe();

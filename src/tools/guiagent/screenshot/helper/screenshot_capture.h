@@ -1,33 +1,36 @@
 #pragma once
 #include <string>
-#include "nlohmann/json.hpp"
 
-
-class IScreenshotExecutor{
+class IScreenshotExecutor {
 private:
-    std::string outputPath;
     std::string name;
     std::string description;
 public:
-    IScreenshotExecutor(std::string name, std::string description):name(name),description(description){};
-    virtual ~IScreenshotExecutor()=default;
-    virtual bool capture(const std::string&outputPath)=0;
+    IScreenshotExecutor(std::string name, std::string description)
+        : name(std::move(name)), description(std::move(description)) {}
+    virtual ~IScreenshotExecutor() = default;
+    virtual bool capture(const std::string& outputPath) = 0;
+    // Gợi ý cấu hình khi chụp màn hình thất bại (mỗi HĐH có yêu cầu quyền/phần mềm khác nhau)
+    virtual std::string setupHint() const = 0;
 };
 
-class macOSScreenshotExecutor: public IScreenshotExecutor{
+class macOSScreenshotExecutor : public IScreenshotExecutor {
 public:
     macOSScreenshotExecutor();
     bool capture(const std::string& outputPath) override;
+    std::string setupHint() const override;
 };
 
-class WindowsScreenshotExecutor: public IScreenshotExecutor{
+class WindowsScreenshotExecutor : public IScreenshotExecutor {
 public:
     WindowsScreenshotExecutor();
-    bool capture(const std::string&outputPath) override;
+    bool capture(const std::string& outputPath) override;
+    std::string setupHint() const override;
 };
 
-class LinuxScreenshotExecutor: public IScreenshotExecutor{
+class LinuxScreenshotExecutor : public IScreenshotExecutor {
 public:
     LinuxScreenshotExecutor();
-    bool capture(const std::string&outputPath) override;
+    bool capture(const std::string& outputPath) override;
+    std::string setupHint() const override;
 };

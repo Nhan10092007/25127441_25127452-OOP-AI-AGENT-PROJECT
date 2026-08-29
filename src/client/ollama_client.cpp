@@ -50,6 +50,9 @@ LLMResponse OllamaClient::sendRequest(const std::vector<Message> &messages){
     json_payload["messages"] = json_messages;
 
     CURL* curl = curl_easy_init(); // Khởi tạo Handle quản lý phiên kết nối HTTP
+    if(!curl){
+        throw std::runtime_error("Libcurl Error: can't initialize CURL handle");
+    }
     curl_slist* header = nullptr; // Con trỏ để gán nhãn
     header = curl_slist_append(
         header,
@@ -99,6 +102,10 @@ LLMResponse OllamaClient::sendRequest(const std::vector<Message> &messages){
         CURLOPT_WRITEDATA, // Dùng để cho callback biết là ghi câu trả lời vào đâu
         &responseData
     );
+    // Không có timeout thì khi tunnel ngrok treo, agent sẽ đứng im vĩnh viễn thay vì báo lỗi để retry.
+    // Để rộng rãi vì request kèm ảnh (GUI Agent) chạy chậm hơn nhiều so với request text.
+    curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 15L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 300L);
 
     CURLcode result = curl_easy_perform(curl);
 

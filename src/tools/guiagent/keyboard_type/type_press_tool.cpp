@@ -1,6 +1,13 @@
 #include "type_press_tool.h"
-KeyboardTypeTool::KeyboardTypeTool() : Tool("type_text",
-                                            "Types a string of text at the current cursor focus. Mandatory JSON parameter: 'text' (string).")
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
+
+KeyboardTypeTool::KeyboardTypeTool()
+    : Tool("type_text",
+           "Types a string of text into whatever UI element currently has keyboard focus "
+           "(click on the target field first, or open it with key_press). "
+           "Mandatory JSON parameter: 'text' (string). Example: {\"text\": \"Hello\"}")
 {
     executor = KeyboardFactory::createExecutor();
 }
@@ -9,7 +16,6 @@ std::string KeyboardTypeTool::execute(const std::string& args) {
     if (args.empty()) {
         return json{{"status", "error"}, {"message", "Missing arguments"}}.dump();
     }
-
     if (!json::accept(args)) {
         return json{{"status", "error"}, {"message", "Invalid JSON format"}}.dump();
     }

@@ -1,37 +1,40 @@
 #include "mouse_click_tool.h"
-MouseClickTool::MouseClickTool() : Tool("mouse_click",
-                                        "Simulates a mouse click at the specified screen coordinates. "
-                                        "Requires JSON parameters: 'x' and 'y' (e.g., '{\"x\": 100, \"y\": 200}'). "
-                                        "Returns status and a message indicating success or failure.")
+#include "nlohmann/json.hpp"
+
+using json = nlohmann::json;
+
+MouseClickTool::MouseClickTool()
+    : Tool("click",
+           "Moves the mouse and performs a left click at the given screen coordinates. "
+           "Mandatory JSON parameters: 'x' (int), 'y' (int).")
 {
     executor = MouseFactory::createExecutor();
-};
+}
 
-std::string MouseClickTool::execute(const std::string &args)
-{
-    if (args.empty())
-    {
+std::string MouseClickTool::execute(const std::string& args) {
+    if (args.empty()) {
         return json{{"status", "error"}, {"message", "Missing arguments"}}.dump();
     }
-
-    if (!json::accept(args))
-    {
+    if (!json::accept(args)) {
         return json{{"status", "error"}, {"message", "Invalid JSON format"}}.dump();
     }
+
     json parsed = json::parse(args);
-    if (!parsed.contains("x") || !parsed.contains("y"))
-    {
-        return json{{"status", "error"}, {"message", "Missing 'x' or 'y'"}}.dump();
+    if (!parsed.contains("x") || !parsed["x"].is_number_integer()) {
+        return json{{"status", "error"}, {"message", "Missing or invalid 'x' parameter"}}.dump();
     }
-    if (!parsed["x"].is_number() || !parsed["y"].is_number())
-    {
-        return json{{"status", "error"}, {"message", "'x' and 'y' must be numbers"}}.dump();
+    if (!parsed.contains("y") || !parsed["y"].is_number_integer()) {
+        return json{{"status", "error"}, {"message", "Missing or invalid 'y' parameter"}}.dump();
     }
+
     int x = parsed["x"].get<int>();
     int y = parsed["y"].get<int>();
-    if (executor->click(x, y))
-    {
-        return json{{"status", "success"}, {"message", "Clicked at " + std::to_string(x) + ", " + std::to_string(y)}}.dump();
+
+    if (executor->click(x, y)) {
+        return json{
+            {"status", "success"},
+            {"message", "Clicked at (" + std::to_string(x) + ", " + std::to_string(y) + ")"}
+        }.dump();
     }
-    return json{{"status", "error"}, {"message", "OS mouse execution failed."}}.dump();
+    return json{{"status", "error"}, {"message", "OS mouse execution failed"}}.dump();
 }

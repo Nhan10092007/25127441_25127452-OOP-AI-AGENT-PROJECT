@@ -88,5 +88,60 @@
     "eval_script_linux": "test -f workspace/member_price.txt && grep -q 'final price: 150' workspace/member_price.txt",
     "eval_script_windows": "if exist workspace\\member_price.txt (findstr /C:\"final price: 150\" workspace\\member_price.txt) else (exit /b 1)",
     "max_steps": 14
+  },
+  {
+    "id": "task_011",
+    "description": "Simple: list_dir usage",
+    "instruction": "Use the list_dir tool to list all files in the workspace directory, then tell me what files are there.",
+    "eval_type": "keyword",
+    "eval_script_linux": "workspace",
+    "eval_script_windows": "workspace",
+    "max_steps": 6
+  },
+  {
+    "id": "task_012",
+    "description": "Simple: datetime usage",
+    "instruction": "What is today's date and the current time? Use the datetime tool to find out and tell me.",
+    "eval_type": "keyword",
+    "eval_script_linux": "2026",
+    "eval_script_windows": "2026",
+    "max_steps": 6
+  },
+  {
+    "id": "task_013",
+    "description": "Simple: string_tool count_words",
+    "instruction": "Count the number of words in the following sentence: 'The quick brown fox jumps over the lazy dog'. Use the string_tool and tell me the exact count.",
+    "eval_type": "keyword",
+    "eval_script_linux": "9",
+    "eval_script_windows": "9",
+    "max_steps": 6
+  },
+  {
+    "id": "task_014",
+    "description": "Medium: string_tool uppercase + file write",
+    "instruction": "Convert the text 'hello world from the ai agent' to uppercase using the string_tool, then write the uppercase result to a file named shout.txt.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/shout.txt && grep -q 'HELLO WORLD FROM THE AI AGENT' workspace/shout.txt",
+    "eval_script_windows": "if exist workspace\\shout.txt (findstr /C:\"HELLO WORLD FROM THE AI AGENT\" workspace\\shout.txt) else (exit /b 1)",
+    "max_steps": 10
+  },
+  {
+    "id": "task_015",
+    "description": "Medium: datetime + file write + list_dir verification",
+    "instruction": "Get the current date and time using the datetime tool, write it into a file named timestamp.txt, then use list_dir to confirm the file exists in the workspace directory. Tell me the timestamp you saved.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/timestamp.txt && test -s workspace/timestamp.txt",
+    "eval_script_windows": "if exist workspace\\timestamp.txt (findstr /R \".\" workspace\\timestamp.txt >nul) else (exit /b 1)",
+    "max_steps": 10
+  },
+  {
+    "id": "task_016",
+    "description": "Hard: GUI full interaction — screenshot, find target, click, type",
+    "instruction": "Open the Microsoft Edge application using only GUI interactions (do not use the exec tool). Open new tab and find the tempature of Ho Chi Minh City, then open new tab and find temparature in Ha Noi. Finally, create a temperatures.txt file save in format: 'City: temparature'. Take a screenshot and save it to verify. Report whether all steps were successful.",
+    "eval_type": "keyword",
+    "eval_script_linux": "success",
+    "eval_script_windows": "success",
+    "max_steps": 16,
+    "requires_gui": true
   }
 ]

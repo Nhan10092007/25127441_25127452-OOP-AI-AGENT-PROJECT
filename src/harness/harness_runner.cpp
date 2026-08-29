@@ -8,7 +8,16 @@
 #include"tools/exec/exec_tool.h"
 #include"tools/web/web_tool.h"
 #include"tools/file/file_tool.h"
-#include"tools/memory/memory_tool.h"
+#include "tools/memory/memory_tool.h"
+#include "tools/guiagent/screenshot/screenshot_tool.h"
+#include "tools/guiagent/mouse_click/mouse_click_tool.h"
+#include "tools/guiagent/keyboard_type/type_press_tool.h"
+#include "tools/guiagent/keyboard_type/key_press_tool.h"
+#include "tools/listdir/list_dir_tool.h"
+#include "tools/datetime/datetime_tool.h"
+#include "tools/stringtool/string_tool.h"
+#include "tools/tool_policy.h"
+#include "agent/vision_agent_loop.h"
 #include<iostream>
 #include"trajectory.h"
 #include"keyword_evaluator.h"
@@ -16,6 +25,26 @@
 #include<functional>
 
 using json = nlohmann::json;
+
+// Thay chuỗi base64 của ảnh bằng một placeholder ngắn gọn.
+// Dùng khi ghi trajectory / messages.json để file report không phình lên hàng chục MB.
+static std::string shortenImageData(const std::string& content){
+    const std::string key = "\"image_base64\":\"";
+    std::size_t start = content.find(key);
+    if(start == std::string::npos){
+        return content;
+    }
+    std::size_t valueStart = start + key.size();
+    std::size_t valueEnd = content.find('"', valueStart);
+    if(valueEnd == std::string::npos){
+        return content;
+    }
+    std::size_t length = valueEnd - valueStart;
+    return content.substr(0, valueStart)
+         + "<base64 image omitted, " + std::to_string(length) + " chars>"
+         + content.substr(valueEnd);
+}
+
 
 HarnessConfig HarnessRunner::readHarnessConfig(const fs::path& configPath) const{
     std::ifstream file(configPath);
@@ -79,6 +108,7 @@ std::vector<Task> HarnessRunner::readTasks(const fs::path& tasksPath) const{
         temp.eval_script_windows = task.value("eval_script_windows", "");
         temp.eval_script_linux = task.value("eval_script_linux", "");
         temp.max_steps = task["max_steps"];
+        temp.requires_gui = task.value("requires_gui", false);
         res.push_back(temp);
     }
     return res;
@@ -121,6 +151,10 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
 
     toolRegistry = std::make_shared<ToolRegistry>();
     
+    toolRegistry->registerTool<ScreenshotTool>("capture_screenshot");
+    toolRegistry->registerTool<KeyPressTool>("key_press");
+    toolRegistry->registerTool<MouseClickTool>("click");
+    toolRegistry->registerTool<KeyboardTypeTool>("type_text");
     toolRegistry->registerTool<CalculatorTool>("calculator");
     toolRegistry->registerTool<ExecTool>("exec");
     toolRegistry->registerTool<ReadFileTool>("read_file");
@@ -132,7 +166,18 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
     toolRegistry->registerToolFactory("memory_search", [this]() -> std::unique_ptr<Tool> {
         return std::make_unique<MemorySearch>(embeddingClient.get(), config.embeddingConfig.similarity_threshold);
     });
+    toolRegistry->registerTool<ListDirTool>("list_dir");
+    toolRegistry->registerTool<DatetimeTool>("datetime");
+    toolRegistry->registerTool<StringTool>("string_tool");
 
+    mainPolicy = ToolPolicy::allowOnly({
+        "calculator", "exec", "read_file", "write_file", "web_search",
+        "memory_save", "memory_search", "list_dir", "datetime", "string_tool"
+    });
+    guiPolicy = ToolPolicy::allowOnly({
+        "capture_screenshot", "click", "type_text", "key_press",
+        "write_file", "read_file"
+    });
 
     std::string mode = toLower(config.envConfig.mode);
     if(mode == "sandbox"){
@@ -159,6 +204,9 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
 }
 
 double HarnessRunner::calcSuccessRate(int passCount, int numberOfTasks) const{
+    if(numberOfTasks <= 0){ // Tránh chia cho 0 khi tasks.json rỗng
+        return 0.0;
+    }
     return ((double)passCount / numberOfTasks) * 100;
 }
 
@@ -174,9 +222,10 @@ void HarnessRunner::exportTaskReport(const Task& task, const AgentResult& result
         for(const auto& [role, content, images] : result.messages){
             json temp;
             temp["role"] = role;
-            temp["content"] = content;
+            temp["content"] = shortenImageData(content);
             if(!images.empty()){
-                temp["images"] = images;
+                // Không ghi nguyên base64 vào report, chỉ ghi số lượng ảnh đã gửi kèm
+                temp["images"] = std::to_string(images.size()) + " image(s) sent to the model (base64 omitted)";
             }
             messages.push_back(temp);
         }
@@ -298,12 +347,29 @@ void HarnessRunner::runBatch(){
     std::cout<<"START RUN BATCH...\n";
     for(const auto& task : tasksList){
         try{
+            toolRegistry->setPolicy(task.requires_gui ? guiPolicy : mainPolicy);
+            
             std::vector<std::string> necessarySkills = skillLoader.selectSkills(task.instruction);
             std::string systemPrompt = toolRegistry->getToolsDescription() +  skillLoader.getSkills(necessarySkills);
             Trajectory trajectory(task.id, config.llmConfig.model_name);
-            AgentLoop loop(client.get(), env.get(), task.max_steps, threshold, [&trajectory](const StepRecord& record){
-                trajectory.addStep(record);
-            });
+
+            auto hook = [&trajectory](const StepRecord& record){
+                StepRecord compact = record;
+                // Ảnh base64 dài hàng trăm KB => cắt bớt trước khi ghi vào trajectory
+                if(compact.tool_result.has_value()){
+                    compact.tool_result = shortenImageData(compact.tool_result.value());
+                }
+                trajectory.addStep(compact);
+            };
+
+            // Task GUI cần VLM "nhìn" được ảnh => dùng VisionAgentLoop (đa hình qua con trỏ AgentLoop*)
+            std::unique_ptr<AgentLoop> loop;
+            if(task.requires_gui){
+                loop = std::make_unique<VisionAgentLoop>(client.get(), env.get(), task.max_steps, threshold, hook);
+            }
+            else{
+                loop = std::make_unique<AgentLoop>(client.get(), env.get(), task.max_steps, threshold, hook);
+            }
             Message system = {
                 .role = "system",
                 .content = systemPrompt
@@ -312,7 +378,7 @@ void HarnessRunner::runBatch(){
                 .role = "user",
                 .content = task.instruction
             };
-            AgentResult result = loop.run({system, prompt});
+            AgentResult result = loop->run({system, prompt});
 
             std::unique_ptr<Evaluator> evaluator;
             if(task.eval_type == "keyword"){
