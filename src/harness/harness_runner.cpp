@@ -175,7 +175,8 @@ HarnessRunner::HarnessRunner(const fs::path& configPath, const fs::path& skillsP
         "memory_save", "memory_search", "list_dir", "datetime", "string_tool"
     });
     guiPolicy = ToolPolicy::allowOnly({
-        "capture_screenshot", "click", "type_text", "key_press"
+        "capture_screenshot", "click", "type_text", "key_press",
+        "write_file", "read_file"
     });
 
     std::string mode = toLower(config.envConfig.mode);

@@ -137,7 +137,7 @@
   {
     "id": "task_016",
     "description": "Hard: GUI full interaction — screenshot, find target, click, type",
-    "instruction": "Open the TextEdit application using only GUI interactions (do not use the exec tool). Create a new document, click the text area, and type 'Hello from AI Agent'. Finally, take a screenshot of the filled document and save it to verify. Report whether all steps were successful.",
+    "instruction": "Open the Chrome application using only GUI interactions (do not use the exec tool). Open new tab and find the tempature of Ho Chi Minh City, then open new tab and find temparature in Ha Noi. Finally, create a temperatures.txt file save in format: 'City: temparature'. Take a screenshot and save it to verify. Report whether all steps were successful.",
     "eval_type": "keyword",
     "eval_script_linux": "success",
     "eval_script_windows": "success",
