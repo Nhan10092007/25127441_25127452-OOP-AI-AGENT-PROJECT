@@ -12,4 +12,4 @@ archive/
 *.db
 
 document.md
-config.json
+config/config.json
