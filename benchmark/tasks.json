@@ -1,6 +1,141 @@
 [
   {
     "id": "task_001",
+    "description": "Simple: calculation",
+    "instruction": "A store sells notebooks at $4.50 each. Calculate the total cost of buying 15 notebooks, then tell me the exact total price.",
+    "eval_type": "keyword",
+    "eval_script_linux": "67.5",
+    "eval_script_windows": "67.5",
+    "max_steps": 6
+  },
+  {
+    "id": "task_002",
+    "description": "Simple: multi-line file write/read",
+    "instruction": "Write a two-line note to a file named memo.txt: first line 'Team standup at 9am', second line 'Bring the sprint board'. Then read the file back and tell me its full content.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/memo.txt && grep -q 'Bring the sprint board' workspace/memo.txt && grep -q 'Team standup at 9am' workspace/memo.txt",
+    "eval_script_windows": "if exist workspace\\memo.txt (findstr /C:\"Bring the sprint board\" workspace\\memo.txt && findstr /C:\"Team standup at 9am\" workspace\\memo.txt) else exit 1",
+    "max_steps": 8
+  },
+  {
+    "id": "task_003",
+    "description": "Simple: directory listing via exec, saved into workspace",
+    "instruction": "Use a shell command to list the files currently in the workspace directory, then save that exact output into a file named listing.txt inside the workspace.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -s workspace/listing.txt",
+    "eval_script_windows": "if not exist workspace\\listing.txt (exit /b 1) else (findstr /R \".\" workspace\\listing.txt >nul)",
+    "max_steps": 8
+  },
+  {
+    "id": "task_004",
+    "description": "Simple: web_search lookup",
+    "instruction": "Search for information about Isaac Newton and tell me what scientific law or theory he is most famous for.",
+    "eval_type": "keyword",
+    "eval_script_linux": "gravit",
+    "eval_script_windows": "gravit",
+    "max_steps": 8
+  },
+  {
+    "id": "task_005",
+    "description": "Medium: memory conditional + calculator",
+    "instruction": "Check memory for a key called 'tax_rate'. If it is not found, calculate 8% tax on a $294 purchase, save that computed tax amount under 'tax_rate', then tell me the tax amount.",
+    "eval_type": "keyword",
+    "eval_script_linux": "23.52",
+    "eval_script_windows": "23.52",
+    "max_steps": 10
+  },
+  {
+    "id": "task_006",
+    "description": "Medium: file conditional + exec verification (3 tools)",
+    "instruction": "Read a file named settings.txt. If it does not exist, create it with the content 'mode=production', then use a shell command to display the file's content back to confirm it was written correctly.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/settings.txt && grep -q 'mode=production' workspace/settings.txt",
+    "eval_script_windows": "if exist workspace\\settings.txt (findstr /C:\"mode=production\" workspace\\settings.txt) else (exit /b 1)",
+    "max_steps": 12
+  },
+  {
+    "id": "task_007",
+    "description": "Medium: web_search + memory caching",
+    "instruction": "Search for information about the C++ programming language, save a key fact about who created it to memory under the key 'cpp_info', then look it up again from memory and tell me what it says.",
+    "eval_type": "keyword",
+    "eval_script_linux": "Stroustrup",
+    "eval_script_windows": "Stroustrup",
+    "max_steps": 10
+  },
+  {
+    "id": "task_008",
+    "description": "Medium: 4-tool sequential chain",
+    "instruction": "Calculate the square root of 144 by raising 144 to the power of 0.5, write the result to a file named sqrt_result.txt in the format 'sqrt result: <value>' (e.g. 'sqrt result: 12'), use a shell command to display that file's content, and finally read the file directly using the file-reading tool to confirm the value.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/sqrt_result.txt && grep -q 'sqrt result: 12' workspace/sqrt_result.txt",
+    "eval_script_windows": "if exist workspace\\sqrt_result.txt (findstr /C:\"sqrt result: 12\" workspace\\sqrt_result.txt) else (exit /b 1)",
+    "max_steps": 12
+  },
+  {
+    "id": "task_009",
+    "description": "Hard: web_search + calculator + memory + file, agent decides tool order",
+    "instruction": "I want to know how many years ago Charles Darwin was born, based on his birth year and today's year 2026. Search for confirmation of his birth year, calculate the number of years since then, save that number to memory under 'darwin_age_years', and write it into a file named darwin_fact.txt. Tell me the final number.",
+    "eval_type": "keyword",
+    "eval_script_linux": "217",
+    "eval_script_windows": "217",
+    "max_steps": 16
+  },
+  {
+    "id": "task_010",
+    "description": "Hard: memory conditional + calculator + file + verification, agent decides tool order",
+    "instruction": "Check if a membership discount is stored in memory under 'member_discount'. If not, assume a discount of 25%, save it to memory under that key. Then calculate the final price of a $200 item after applying this discount, save the final price to a file named member_price.txt in the format 'final price: <value>' (e.g. 'final price: 150'), and read the file back to confirm the exact value before telling me the final price.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/member_price.txt && grep -q 'final price: 150' workspace/member_price.txt",
+    "eval_script_windows": "if exist workspace\\member_price.txt (findstr /C:\"final price: 150\" workspace\\member_price.txt) else (exit /b 1)",
+    "max_steps": 14
+  },
+  {
+    "id": "task_011",
+    "description": "Simple: list_dir usage",
+    "instruction": "Use the list_dir tool to list all files in the workspace directory, then tell me what files are there.",
+    "eval_type": "keyword",
+    "eval_script_linux": "workspace",
+    "eval_script_windows": "workspace",
+    "max_steps": 6
+  },
+  {
+    "id": "task_012",
+    "description": "Simple: datetime usage",
+    "instruction": "What is today's date and the current time? Use the datetime tool to find out and tell me.",
+    "eval_type": "keyword",
+    "eval_script_linux": "2026",
+    "eval_script_windows": "2026",
+    "max_steps": 6
+  },
+  {
+    "id": "task_013",
+    "description": "Simple: string_tool count_words",
+    "instruction": "Count the number of words in the following sentence: 'The quick brown fox jumps over the lazy dog'. Use the string_tool and tell me the exact count.",
+    "eval_type": "keyword",
+    "eval_script_linux": "9",
+    "eval_script_windows": "9",
+    "max_steps": 6
+  },
+  {
+    "id": "task_014",
+    "description": "Medium: string_tool uppercase + file write",
+    "instruction": "Convert the text 'hello world from the ai agent' to uppercase using the string_tool, then write the uppercase result to a file named shout.txt.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/shout.txt && grep -q 'HELLO WORLD FROM THE AI AGENT' workspace/shout.txt",
+    "eval_script_windows": "if exist workspace\\shout.txt (findstr /C:\"HELLO WORLD FROM THE AI AGENT\" workspace\\shout.txt) else (exit /b 1)",
+    "max_steps": 10
+  },
+  {
+    "id": "task_015",
+    "description": "Medium: datetime + file write + list_dir verification",
+    "instruction": "Get the current date and time using the datetime tool, write it into a file named timestamp.txt, then use list_dir to confirm the file exists in the workspace directory. Tell me the timestamp you saved.",
+    "eval_type": "functional",
+    "eval_script_linux": "test -f workspace/timestamp.txt && test -s workspace/timestamp.txt",
+    "eval_script_windows": "if exist workspace\\timestamp.txt (findstr /R \".\" workspace\\timestamp.txt >nul) else (exit /b 1)",
+    "max_steps": 10
+  },
+  {
+    "id": "task_016",
     "description": "Hard: GUI full interaction — screenshot, find target, click, type",
     "instruction": "Open the TextEdit application using only GUI interactions (do not use the exec tool). Create a new document, click the text area, and type 'Hello from AI Agent'. Finally, take a screenshot of the filled document and save it to verify. Report whether all steps were successful.",
     "eval_type": "keyword",

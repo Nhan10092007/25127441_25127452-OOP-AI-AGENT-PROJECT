@@ -1,4 +1,4 @@
-```mermaid
+
 graph TB
     subgraph ENTRY["Entry Point (benchmark/)"]
         run_eval["run_eval.cpp main()"]

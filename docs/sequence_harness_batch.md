@@ -1,4 +1,4 @@
-```mermaid
+
 sequenceDiagram
     autonumber
     participant Main as main()
