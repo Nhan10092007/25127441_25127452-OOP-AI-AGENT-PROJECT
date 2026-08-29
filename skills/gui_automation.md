@@ -27,16 +27,37 @@ There is **no exec / shell tool** in GUI mode: an application can only be opened
 6. **Do not repeat a failed action identically.** If a screenshot shows nothing changed, change the coordinates or use a different approach (keyboard instead of mouse). Repeating the same call is detected as a loop and aborts the task.
 7. **Report at the end.** When the goal is reached, `finish` with a short report that states clearly whether each step was successful.
 
-## HOW TO OPEN AN APPLICATION (macOS):
-The reliable, mouse-free way is Spotlight:
-1. `key_press` with `{"key": "cmd+space"}` — Spotlight opens.
-2. `type_text` with `{"text": "TextEdit"}` — type the app name.
-3. `capture_screenshot` — check that the app is the highlighted result.
-4. `key_press` with `{"key": "Enter"}` — launch it.
-5. `capture_screenshot` — confirm the window is on screen before doing anything else.
+## HOW TO OPEN AN APPLICATION:
+Use the platform's built-in app launcher via keyboard:
 
-Useful follow-ups: `cmd+n` (new document), `cmd+s` (save), `cmd+q` (quit).
-If a modal dialog appears (for example TextEdit's document chooser), read it from the screenshot and click the button you need instead of assuming it is not there.
+**macOS (Spotlight):**
+1. `key_press` `{"key": "cmd+space"}` → Spotlight opens.
+2. `type_text` `{"text": "AppName"}` → type the app name.
+3. `capture_screenshot` → verify the app is the highlighted result.
+4. `key_press` `{"key": "Enter"}` → launch it.
+
+**Windows (Start Menu):**
+1. `key_press` `{"key": "cmd"}` → Start Menu opens. (`cmd` maps to the Windows key.)
+2. `type_text` `{"text": "AppName"}` → type the app name.
+3. `capture_screenshot` → verify the app is the highlighted result.
+4. `key_press` `{"key": "Enter"}` → launch it.
+
+**Linux (Application Launcher):**
+1. `key_press` `{"key": "cmd"}` → GNOME/KDE launcher opens. (`cmd` maps to the Super key.)
+2. `type_text` `{"text": "AppName"}` → type the app name.
+3. `capture_screenshot` → verify the app is the highlighted result.
+4. `key_press` `{"key": "Enter"}` → launch it.
+
+After launching, always `capture_screenshot` to confirm the window is on screen before doing anything else.
+
+**Common shortcuts (cross-platform):**
+- New document: `cmd+n` (macOS) / `ctrl+n` (Windows/Linux)
+- Save: `cmd+s` / `ctrl+s`
+- Close/Quit: `cmd+q` / `alt+f4`
+- Select all: `cmd+a` / `ctrl+a`
+- Copy/Paste: `cmd+c`/`cmd+v` / `ctrl+c`/`ctrl+v`
+
+If a modal dialog appears, read it from the screenshot and click the correct button instead of assuming it is not there.
 
 ## GUI WORKFLOW LOOP:
 1. `capture_screenshot` → observe the screen
