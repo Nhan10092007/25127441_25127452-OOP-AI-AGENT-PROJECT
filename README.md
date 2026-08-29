@@ -388,7 +388,7 @@ cmake --build build --target vision_loop_test && ./build/vision_loop_test
     ```bash
     cmake --build build && ./build/agent_runner
     ```
-
+## **Lưu ý quan trọng:** Thầy phải giữ máy treo trong suốt quá trình chạy tasks cho đến khi kết thúc. Vì sự thay đổi trên máy của thầy có thể làm ảnh hưởng đến quá trình thực thi của GUI Agent.
 # Xem kết quả sau khi chạy chương trình:
 
 Sau khi chạy xong, nếu thầy thấy kết quả trên terminal hiện như sau:
