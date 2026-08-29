@@ -28,34 +28,12 @@ There is **no exec / shell tool** in GUI mode: an application can only be opened
 7. **Report at the end.** When the goal is reached, `finish` with a short report that states clearly whether each step was successful.
 
 ## HOW TO OPEN AN APPLICATION:
-Use the platform's built-in app launcher via keyboard:
-
-**macOS (Spotlight):**
-1. `key_press` `{"key": "cmd+space"}` → Spotlight opens.
-2. `type_text` `{"text": "AppName"}` → type the app name.
-3. `capture_screenshot` → verify the app is the highlighted result.
-4. `key_press` `{"key": "Enter"}` → launch it.
-
-**Windows (Start Menu):**
-1. `key_press` `{"key": "cmd"}` → Start Menu opens. (`cmd` maps to the Windows key.)
-2. `type_text` `{"text": "AppName"}` → type the app name.
-3. `capture_screenshot` → verify the app is the highlighted result.
-4. `key_press` `{"key": "Enter"}` → launch it.
-
-**Linux (Application Launcher):**
-1. `key_press` `{"key": "cmd"}` → GNOME/KDE launcher opens. (`cmd` maps to the Super key.)
-2. `type_text` `{"text": "AppName"}` → type the app name.
-3. `capture_screenshot` → verify the app is the highlighted result.
-4. `key_press` `{"key": "Enter"}` → launch it.
-
-After launching, always `capture_screenshot` to confirm the window is on screen before doing anything else.
-
-**Common shortcuts (cross-platform):**
-- New document: `cmd+n` (macOS) / `ctrl+n` (Windows/Linux)
-- Save: `cmd+s` / `ctrl+s`
-- Close/Quit: `cmd+q` / `alt+f4`
-- Select all: `cmd+a` / `ctrl+a`
-- Copy/Paste: `cmd+c`/`cmd+v` / `ctrl+c`/`ctrl+v`
+Use the system's app launcher shortcut to open any application without a shell:
+1. Open the system search/launcher (e.g. Spotlight, Start Menu).
+2. Type the app name.
+3. Capture the screen to verify the app appears as the top result.
+4. Press Enter to launch it.
+5. Capture the screen to confirm the window is on screen before doing anything else.
 
 If a modal dialog appears, read it from the screenshot and click the correct button instead of assuming it is not there.
 
